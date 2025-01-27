@@ -2,16 +2,15 @@
 
 namespace App\Controllers;
 
-class Home extends BaseController
+class SalesInvoice extends BaseController
 {
     public function index()
     {
         $session = session();
         $login = $session->get('login');
-        // echo $login;
         if($login != 1) {
             return redirect()->to(base_url('login'));
         }
-        return view('home/home');
+        return view('sales_invoice/sales_invoice');
     }
 }

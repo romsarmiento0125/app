@@ -33,6 +33,10 @@
     .btn-primary {
         margin-top: 20px;
     }
+    .form-control:focus {
+        box-shadow: 0 0 5px 2px #d4edda; /* Bootstrap light success */
+        border-color: #d4edda; /* Bootstrap light success */
+    }
 </style>
 
 <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
@@ -99,15 +103,30 @@
 
 <script>
     function userLogin() {
-        // const username = document.getElementById('username').value;
-        // const password = document.getElementById('password').value;
+        var username = $('#username').val();
+        var password = $('#password').val();
 
-        // if (username === 'admin' && password === 'admin') {
-        //     window.location.href = '<?= base_url('dashboard') ?>';
-        // } else {
-        //     alert('Invalid username or password.');
-        // }
-        window.location.href = '<?= base_url('/') ?>';
+        if (username === '' || password === '') {
+            alert('Username and password cannot be empty.');
+            return;
+        }
+
+        $.ajax({
+            url: '<?= base_url('login/authenticate') ?>',
+            type: 'POST',
+            data: {
+                username: username,
+                password: password
+            },
+            success: function(response) {
+                var data = JSON.parse(response);
+                if (data == 'success') {
+                    window.location.href = '<?= base_url('/') ?>';
+                } else {
+                    alert('Invalid username or password.');
+                }
+            }
+        });
     }
 </script>
 <?= $this->endSection() ?>
