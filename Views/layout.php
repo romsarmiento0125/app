@@ -9,6 +9,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/bootstrap/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/fontawesome/css/font-awesome.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/datatables/datatables.min.css') ?>">
     <script src="<?= base_url('assets/jquery-3.7.1.min.js') ?>"></script>
 </head>
 <style>
@@ -28,6 +29,10 @@
         justify-content: center;
         z-index: 9999;
     }
+    p {
+        margin: 0;
+        font-size: 1.2rem;
+    }
 </style>
 <body>
     <?php if (!isset($hide_header) || !$hide_header): ?>
@@ -40,9 +45,8 @@
         <button id="logout_button" class="btn btn-primary"><i class="fa fa-sign-out" aria-hidden="true"></i></button>
     <?php endif; ?>
 
-
-    <!-- Bootstrap JS -->
     <script src="<?= base_url('assets/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
+    <script src="<?= base_url('assets/datatables/datatables.min.js') ?>"></script>
     <script>
         $('#logout_button').click(function() {
             $.ajax({

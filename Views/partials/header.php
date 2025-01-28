@@ -6,7 +6,7 @@
         background-color: white;
         border-radius: 50px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 0 2rem; /* Add more space on both sides */
+        padding: 0 1rem; /* Add more space on both sides */
     }
     .nav-link {
         font-size: 1rem;
@@ -50,10 +50,10 @@
                     <a class="nav-link <?= $current_page == 'delivery_receipt' ? 'active' : '' ?>" href="<?= base_url('/delivery_receipt') ?>">Delivery Receipt</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page == 'add_clients' ? 'active' : '' ?>" href="<?= base_url('/add_clients') ?>">Add Clients</a>
+                    <a class="nav-link <?= $current_page == 'add_clients' ? 'active' : '' ?>" href="<?= base_url('/add_clients') ?>">Clients</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page == 'add_products' ? 'active' : '' ?>" href="<?= base_url('/add_products') ?>">Add Products</a>
+                    <a class="nav-link <?= $current_page == 'products' ? 'active' : '' ?>" href="<?= base_url('/products') ?>">Products</a>
                 </li>
             </ul>
         </div>

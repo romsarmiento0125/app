@@ -20,4 +20,50 @@ class CoreModel extends Model
             return $e->getMessage();
         }
     }
+
+    public function insert_custom_query($query)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+            $this->db->query($query);
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success';
+            }
+        } catch (\Exception $e) {
+            // Rollback transaction in case of exception
+            $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
+
+    public function update_custom_query($query)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+            $this->db->query($query);
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success';
+            }
+        } catch (\Exception $e) {
+            // Rollback transaction in case of exception
+            $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
 }
