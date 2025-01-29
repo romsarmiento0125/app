@@ -75,9 +75,9 @@
         </div>
         <div class="row mt-3">
             <div class="col-4">
-                <a href="#" class="nav-box">
+                <a href="/clients" class="nav-box">
                     <img src="<?= base_url('assets/carousel_photo/Lactating.jpg') ?>" alt="Module 4">
-                    <div>Add Clients</div>
+                    <div>Clients</div>
                 </a>
             </div>
             <div class="col-4">

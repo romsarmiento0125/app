@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <title><?= $title ?? 'CodeIgniter 4' ?></title> -->
     <title>1 Blend Feeds</title>
     <link rel="icon" href="<?= base_url('assets/logo.png') ?>" type="image/x-icon"> 
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/bootstrap/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/fontawesome/css/font-awesome.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/datatables/datatables.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/admin_lte/plugins/select2/css/select2.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/admin_lte/dist/css/adminlte.min.css') ?>">
+
     <script src="<?= base_url('assets/jquery-3.7.1.min.js') ?>"></script>
 </head>
 <style>
@@ -47,7 +48,14 @@
 
     <script src="<?= base_url('assets/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="<?= base_url('assets/datatables/datatables.min.js') ?>"></script>
+    <script src="<?= base_url('assets/admin_lte/plugins/select2/js/select2.full.min.js')?>"></script>
+    <script src="<?= base_url('assets/admin_lte/dist/js/adminlte.min.js')?>"></script>
+
     <script>
+        $(document).ready(function() {
+            $('.select2').select2();
+        });
+
         $('#logout_button').click(function() {
             $.ajax({
             url: '<?= base_url('login/logout') ?>',

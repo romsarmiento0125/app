@@ -64,7 +64,7 @@
                         <table id="product_table" class="table" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th class="d-none">ID</th>
                                     <th>Name</th>
                                     <th>Item&nbsp;Code</th>
                                     <th>Weight&nbsp;(kg)</th>
@@ -84,7 +84,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5">Add Products</h1>
+        <h1 class="modal-title fs-5">Add Product</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -107,13 +107,13 @@
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Weight&nbsp;(kg):&nbsp;</p>
-                        <input type="text" class="form-control" id="product_weight">
+                        <input type="number" class="form-control" id="product_weight">
                     </div>
                 </div>
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Price:&nbsp;</p>
-                        <input type="text" class="form-control" id="product_price">
+                        <input type="number" class="form-control" id="product_price">
                     </div>
                 </div>
             </div>
@@ -130,7 +130,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5">Edit Products</h1>
+        <h1 class="modal-title fs-5">Edit Product</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -139,15 +139,13 @@
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Name:&nbsp;</p>
-                        <p class="fw-bold" id="edit_product_name"></p>
-                        <!-- <input type="text" class="form-control" id="edit_product_name"> -->
+                        <input type="text" class="form-control" id="edit_product_name">
                     </div>
                 </div>
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Item&nbsp;code:&nbsp;</p>
-                        <p class="fw-bold" id="edit_product_item"></p>
-                        <!-- <input type="text" class="form-control" id="edit_product_item"> -->
+                        <input type="text" class="form-control" id="edit_product_item">
                     </div>
                 </div>
             </div>
@@ -155,20 +153,20 @@
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Weight&nbsp;(kg):&nbsp;</p>
-                        <input type="text" class="form-control" id="edit_product_weight">
+                        <input type="number" class="form-control" id="edit_product_weight">
                     </div>
                 </div>
                 <div class="col-6 px-3">
                     <div class="d-flex align-items-center">
                         <p>Price:&nbsp;</p>
-                        <input type="text" class="form-control" id="edit_product_price">
+                        <input type="number" class="form-control" id="edit_product_price">
                     </div>
                 </div>
             </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id='edit_products'>Save changes</button>
+        <button type="button" class="btn btn-primary" id='save_edit_product'>Save changes</button>
       </div>
     </div>
   </div>
@@ -210,7 +208,7 @@
             destroy: true,
             data: data,
             columns: [
-                { data: 'id' },
+                { data: 'id', visible: false },
                 { data: 'product_name' },
                 { data: 'product_item' },
                 { data: 'product_weight' },
@@ -235,9 +233,9 @@
         $('.edit_product').off('click');
         $('.edit_product').on('click', function() {
             var data = product_table_data.row($(this).parents('tr')).data();
-            $('#edit_product_name').text(data.product_name);
+            $('#edit_product_name').val(data.product_name);
             $('#edit_product_name').attr('data-id', data.id);
-            $('#edit_product_item').text(data.product_item);
+            $('#edit_product_item').val(data.product_item);
             $('#edit_product_weight').val(data.product_weight);
             $('#edit_product_price').val(data.product_price);
             $('#editProductModal').modal('show');
@@ -278,6 +276,7 @@
             success: function(response) {
                 var data = JSON.parse(response);
                 if (data == 'success') {
+                    alert('Product saved successfully');
                     get_table_products();
                     clear_modal_fields();
                     $('#addProductModal').modal('hide');
@@ -299,14 +298,14 @@
         });
     });
 
-    $('#edit_products').click(function() {
-        var product_name = $('#edit_product_name').text();
+    $('#save_edit_product').click(function() {
+        var product_name = $('#edit_product_name').val();
         var product_name_attr = $('#edit_product_name').attr('data-id');
-        var product_item = $('#edit_product_item').text();
+        var product_item = $('#edit_product_item').val();
         var product_weight = $('#edit_product_weight').val();
         var product_price = $('#edit_product_price').val();
 
-        if (product_weight === '' || product_price === '') {
+        if (product_name === '' || product_item === '' || product_weight === '' || product_price === '') {
             alert('All fields are required');
             return;
         }
@@ -325,6 +324,7 @@
             success: function(response) {
                 var data = JSON.parse(response);
                 if (data == 'success') {
+                    alert('Product edited successfully');
                     get_table_products();
                     $('#editProductModal').modal('hide');
                 }

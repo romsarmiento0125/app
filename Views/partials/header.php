@@ -50,7 +50,7 @@
                     <a class="nav-link <?= $current_page == 'delivery_receipt' ? 'active' : '' ?>" href="<?= base_url('/delivery_receipt') ?>">Delivery Receipt</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page == 'add_clients' ? 'active' : '' ?>" href="<?= base_url('/add_clients') ?>">Clients</a>
+                    <a class="nav-link <?= $current_page == 'clients' ? 'active' : '' ?>" href="<?= base_url('/clients') ?>">Clients</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $current_page == 'products' ? 'active' : '' ?>" href="<?= base_url('/products') ?>">Products</a>

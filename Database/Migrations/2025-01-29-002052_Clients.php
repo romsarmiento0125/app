@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Products extends Migration
+class Clients extends Migration
 {
     public function up()
     {
@@ -14,23 +14,24 @@ class Products extends Migration
                 'constraint' =>11,
                 'auto_increment' => true
             ],
-            'product_name' => [
+            'client_name' => [
                 'type' => 'VARCHAR',
                 'unique' => true,
                 'constraint' => 255,
                 'null' => false,
             ],
-            'product_item' => [
+            'client_tin' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
-                'constraint' => 50,
-                'null' => false,
+                'constraint' => 100,
             ],
-            'product_weight' => [
+            'client_address' => [
+                'type' => 'TEXT'
+            ],
+            'client_business_name' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 100,
             ],
-            'product_price' => [
+            'client_term' => [
                 'type' => 'VARCHAR',
                 'constraint' => 100,
             ],
@@ -50,11 +51,11 @@ class Products extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        $this->forge->createTable('products');
+        $this->forge->createTable('clients');
     }
 
     public function down()
     {
-        $this->forge->dropTable('products');
+        $this->forge->dropTable('clients');
     }
 }

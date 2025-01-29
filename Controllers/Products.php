@@ -80,11 +80,13 @@ class Products extends BaseController
         $product_price = $this->request->getPost('product_price');
 
         $query = "UPDATE products SET 
+            product_name = '$product_name',
+            product_item = '$product_item',
             product_weight = '$product_weight',
             product_price = '$product_price',
             updater_id = '$user_id',
             updated_at = CURRENT_TIMESTAMP
-            WHERE id = '$product_name_attr' AND product_name = '$product_name' AND product_item='$product_item' AND archive = 0";
+            WHERE id = '$product_name_attr' AND archive = 0";
 
         $update = $this->coreModel->update_custom_query($query);
 
