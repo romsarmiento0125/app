@@ -22,6 +22,11 @@ class Products extends BaseController
         return view('products/products');
     }
 
+    private function sanitize_input($input)
+    {
+        return str_replace("'", "(alt39)", $input);
+    }
+
     public function get_table_products()
     {
         $query = "SELECT * FROM products WHERE archive = 0 LIMIT 1000";
@@ -34,10 +39,10 @@ class Products extends BaseController
         $session = session();
         $user_id = $session->get('user_id');
         
-        $product_name = $this->request->getPost('product_name');
-        $product_item = $this->request->getPost('product_item');
-        $product_weight = $this->request->getPost('product_weight');
-        $product_price = $this->request->getPost('product_price');
+        $product_name = $this->sanitize_input($this->request->getPost('product_name'));
+        $product_item = $this->sanitize_input($this->request->getPost('product_item'));
+        $product_weight = $this->sanitize_input($this->request->getPost('product_weight'));
+        $product_price = $this->sanitize_input($this->request->getPost('product_price'));
 
         $query = "SELECT COUNT(*) as count FROM products WHERE (product_name = '$product_name' OR product_item = '$product_item') AND archive = 0";
         $result = $this->coreModel->get_csutom_query($query);
@@ -73,11 +78,12 @@ class Products extends BaseController
         $session = session();
         $user_id = $session->get('user_id');
         
-        $product_name = $this->request->getPost('product_name');
-        $product_name_attr = $this->request->getPost('product_name_attr');
-        $product_item = $this->request->getPost('product_item');
-        $product_weight = $this->request->getPost('product_weight');
-        $product_price = $this->request->getPost('product_price');
+        $product_name = $this->sanitize_input($this->request->getPost('product_name'));
+        $product_name_attr = $this->sanitize_input($this->request->getPost('product_name_attr'));
+        $product_item = $this->sanitize_input($this->request->getPost('product_item'));
+        $product_item_attr = $this->sanitize_input($this->request->getPost('product_item_attr'));
+        $product_weight = $this->sanitize_input($this->request->getPost('product_weight'));
+        $product_price = $this->sanitize_input($this->request->getPost('product_price'));
 
         $query = "UPDATE products SET 
             product_name = '$product_name',

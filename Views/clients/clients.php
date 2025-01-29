@@ -233,7 +233,17 @@
             url: '<?= base_url('clients/get_table_clients') ?>',
             type: 'POST',
             success: function(response) {
-                var data = JSON.parse(response);
+                var unsanitizeData = JSON.parse(response);
+                var data = unsanitizeData.map(function(client) {
+                    return {
+                        id: client.id,
+                        client_name: sanitizeOutput(client.client_name),
+                        client_tin: sanitizeOutput(client.client_tin),
+                        client_business_name: sanitizeOutput(client.client_business_name),
+                        client_term: sanitizeOutput(client.client_term),
+                        client_address: sanitizeOutput(client.client_address)
+                    };
+                });
                 client_table(data);
                 hideLoader();
             },
@@ -430,8 +440,11 @@
         $('#client_name').val('');
         $('#client_tin').val('');
         $('#client_business_name').val('');
-        $('#client_term').val('');
         $('#client_address').val('');
+    }
+
+    function sanitizeOutput(input) {
+        return input.replace(/\(alt39\)/g, "'");
     }
 </script>
 

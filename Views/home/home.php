@@ -76,13 +76,13 @@
         <div class="row mt-3">
             <div class="col-4">
                 <a href="/clients" class="nav-box">
-                    <img src="<?= base_url('assets/carousel_photo/Lactating.jpg') ?>" alt="Module 4">
+                    <img src="<?= base_url('assets/home_photo/clients_module.png') ?>" alt="Module 4">
                     <div>Clients</div>
                 </a>
             </div>
             <div class="col-4">
                 <a href="/products" class="nav-box">
-                    <img src="<?= base_url('assets/carousel_photo/Pre-Starter.jpg') ?>" alt="Module 5">
+                    <img src="<?= base_url('assets/home_photo/products_module.png') ?>" alt="Module 5">
                     <div>Products</div>
                 </a>
             </div>

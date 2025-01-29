@@ -22,6 +22,11 @@ class Clients extends BaseController
         return view('clients/clients');
     }
 
+    private function sanitize_input($input)
+    {
+        return str_replace("'", "(alt39)", $input);
+    }
+
     public function get_table_clients()
     {
         $query = "SELECT * FROM clients WHERE archive = 0 LIMIT 1000";
@@ -33,12 +38,12 @@ class Clients extends BaseController
     {
         $session = session();
         $user_id = $session->get('user_id');
-        
-        $client_name = $this->request->getPost('client_name');
-        $client_tin = $this->request->getPost('client_tin');
-        $client_business_name = $this->request->getPost('client_business_name');
-        $client_term = $this->request->getPost('client_term');
-        $client_address = $this->request->getPost('client_address');
+
+        $client_name = $this->sanitize_input($this->request->getPost('client_name'));
+        $client_tin = $this->sanitize_input($this->request->getPost('client_tin'));
+        $client_business_name = $this->sanitize_input($this->request->getPost('client_business_name'));
+        $client_term = $this->sanitize_input($this->request->getPost('client_term'));
+        $client_address = $this->sanitize_input($this->request->getPost('client_address'));
 
         $query = "SELECT COUNT(*) as count FROM clients WHERE client_name = '$client_name' AND archive = 0";
         $result = $this->coreModel->get_csutom_query($query);
@@ -76,12 +81,13 @@ class Clients extends BaseController
         $session = session();
         $user_id = $session->get('user_id');
         
-        $client_name = $this->request->getPost('client_name');
-        $client_name_attr = $this->request->getPost('client_name_attr');
-        $client_tin = $this->request->getPost('client_tin');
-        $client_business_name = $this->request->getPost('client_business_name');
-        $client_term = $this->request->getPost('client_term');
-        $client_address = $this->request->getPost('client_address');
+        $client_name = $this->sanitize_input($this->request->getPost('client_name'));
+        $client_name_attr = $this->sanitize_input($this->request->getPost('client_name_attr'));
+        $client_tin = $this->sanitize_input($this->request->getPost('client_tin'));
+        $client_business_name = $this->sanitize_input($this->request->getPost('client_business_name'));
+        $client_item_attr = $this->sanitize_input($this->request->getPost('client_item_attr'));
+        $client_term = $this->sanitize_input($this->request->getPost('client_term'));
+        $client_address = $this->sanitize_input($this->request->getPost('client_address'));
 
         $query = "UPDATE clients SET 
             client_name = '$client_name',

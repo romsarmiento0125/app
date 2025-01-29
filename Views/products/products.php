@@ -183,6 +183,10 @@
         $('#loader').hide();
     }
 
+    function formatPrice(price) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'PHP' }).format(price);
+    }
+
     $(document).ready(function() {
         get_table_products();
     });
@@ -193,7 +197,16 @@
             url: '<?= base_url('products/get_table_products') ?>',
             type: 'POST',
             success: function(response) {
-                var data = JSON.parse(response);
+                var unsanitizedData = JSON.parse(response);
+                var data = unsanitizedData.map(function(product) {
+                    return {
+                        id: product.id,
+                        product_name: sanitizeOutput(product.product_name),
+                        product_item: sanitizeOutput(product.product_item),
+                        product_weight: sanitizeOutput(product.product_weight),
+                        product_price: sanitizeOutput(product.product_price)
+                    };
+                });
                 product_table(data);
                 hideLoader();
             },
@@ -212,7 +225,11 @@
                 { data: 'product_name' },
                 { data: 'product_item' },
                 { data: 'product_weight' },
-                { data: 'product_price' },
+                { 
+                    data: function(data) {
+                        return formatPrice(data.product_price);
+                    }
+                },
                 { 
                     data: function(data) {
                         return '<button type="button" class="btn btn-warning edit_product"><i class="fa fa-pencil"></i></button>'; 
@@ -246,7 +263,7 @@
         var product_name = $('#product_name').val();
         var product_item = $('#product_item').val();
         var product_weight = $('#product_weight').val();
-        var product_price = $('#product_price').val();
+        var product_price = parseFloat($('#product_price').val()).toFixed(2);
 
         if (product_name === '' || product_item === '' || product_weight === '' || product_price === '') {
             alert('All fields are required');
@@ -303,7 +320,7 @@
         var product_name_attr = $('#edit_product_name').attr('data-id');
         var product_item = $('#edit_product_item').val();
         var product_weight = $('#edit_product_weight').val();
-        var product_price = $('#edit_product_price').val();
+        var product_price = parseFloat($('#edit_product_price').val()).toFixed(2);
 
         if (product_name === '' || product_item === '' || product_weight === '' || product_price === '') {
             alert('All fields are required');
@@ -371,6 +388,10 @@
         $('#product_item').val('');
         $('#product_weight').val('');
         $('#product_price').val('');
+    }
+
+    function sanitizeOutput(input) {
+        return input.replace(/\(alt39\)/g, "'");
     }
 </script>
 
