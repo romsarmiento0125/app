@@ -1,51 +1,51 @@
 <?= $this->extend('layout') ?>
 
 <?= $this->section('content') ?>
+
 <style>
-.product_box {
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 15px; 
-    background-color: #f9f9f9;
-    border-top: 5px solid #80b380; 
-}
+    .product_box {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 15px; 
+        background-color: #f9f9f9;
+        border-top: 5px solid #80b380; 
+    }
 
-.product_title {
-    font-size: 1.3rem;
-    font-weight: 600;
-}
+    .product_title p{
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
 
-.modal_box {
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 10px;
-    /* box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3); */
-}
+    .modal_box {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 10px;
+        /* box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3); */
+    }
 
-.content_center {
-    align-content: center;
-}
+    .content_center {
+        align-content: center;
+    }
 
-.loader {
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    animation: spin 2s linear infinite;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: none;
-    z-index: 999;
-}
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        z-index: 999;
+    }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
 <div class="loader" id="loader"></div>
@@ -196,6 +196,9 @@
         $.ajax({
             url: '<?= base_url('products/get_table_products') ?>',
             type: 'POST',
+            beforeSend: function() {
+                $('#loader').show();
+            },
             success: function(response) {
                 var unsanitizedData = JSON.parse(response);
                 var data = unsanitizedData.map(function(product) {

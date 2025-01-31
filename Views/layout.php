@@ -34,6 +34,9 @@
         margin: 0;
         font-size: 1.2rem;
     }
+    hr {
+        border-top: 1px solid #000;
+    }
 </style>
 <body>
     <?php if (!isset($hide_header) || !$hide_header): ?>
