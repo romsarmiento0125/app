@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Products extends Migration
+class SalesInvoiceItemsList extends Migration
 {
     public function up()
     {
@@ -14,15 +14,18 @@ class Products extends Migration
                 'constraint' =>11,
                 'auto_increment' => true
             ],
-            'product_name' => [
+            'client_id' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
-                'constraint' => 255,
+                'constraint' => 50,
                 'null' => false,
             ],
-            'product_item' => [
+            'item_term' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
+                'constraint' => 50,
+                'null' => false,
+            ],
+            'product_id' => [
+                'type' => 'VARCHAR',
                 'constraint' => 50,
                 'null' => false,
             ],
@@ -31,7 +34,8 @@ class Products extends Migration
                 'constraint' => 50,
             ],
             'product_price' => [
-                'type' => 'DOUBLE'
+                'type' => 'VARCHAR',
+                'constraint' => 100,
             ],
             'creator_id' => [
                 'type' => 'VARCHAR',
@@ -49,11 +53,11 @@ class Products extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        $this->forge->createTable('products');
+        $this->forge->createTable('sales_inovice_items_list');
     }
 
     public function down()
     {
-        $this->forge->dropTable('products');
+        $this->forge->dropTable('sales_inovice_items_list');
     }
 }

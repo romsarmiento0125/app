@@ -65,9 +65,9 @@
                 <hr>
                 <div class="">
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="row">
-                                <div class="col-12 mb-4">
+                                <div class="col-6 mb-4">
                                     <div class="sales_invoice_details_box">
                                         <div class="sales_invoice_details_title">
                                             <p>Customer Details</p>
@@ -116,7 +116,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-12 mb-4">
+                                <div class="col-6 mb-4">
                                     <div class="sales_invoice_details_box">
                                         <div class="sales_invoice_details_title">
                                             <p>Items</p>
@@ -185,32 +185,33 @@
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-end">
-                                            <button class="btn btn-primary">Add</button>
+                                            <button class="btn btn-primary" onclick="add_item_details()">Add</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="row">
-                                <div class="col-12 mb-4">
+                                <div class="col-8 mb-4">
                                     <div class="sales_invoice_details_box">
                                         <div class="sales_invoice_details_title">
                                             <p>Item Lists</p>
                                         </div>
                                         <hr>
-                                        <div class="">
+                                        <div class="table-responsive">
                                             <table id="item_list_table" class="table" style="width:100%">
                                                 <thead>
                                                     <tr>
                                                         <th class="d-none">ID</th>
                                                         <th>Item&nbsp;Code</th>
                                                         <th>Qty</th>
-                                                        <th>Price</th>
-                                                        <th>Total&nbsp;Price</th>
+                                                        <th>Amount</th>
                                                         <th>Discount</th>
-                                                        <th>Discounted&nbsp;Price</th>
+                                                        <th>Total&nbsp;Amount</th>
+                                                        <th>Vatable&nbsp;Sales</th>
+                                                        <th>Vat</th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -218,8 +219,21 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-12 mb-4">
-                                    
+                                <div class="col-4 mb-4">
+                                    <div class="sales_invoice_details_box">
+                                        <div class="sales_invoice_details_title">
+                                            <p>Summary</p>
+                                        </div>
+                                        <hr>
+                                        <div class="">
+                                            
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-secondary me-2" onclick="">Draft</button>
+                                            <button class="btn btn-success" onclick="">Print</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -231,9 +245,13 @@
 </div>
 
 <script>
-    var clients;
-    var products;
+    var clients = [];
+    var products = [];
     var vat_switch = false;
+    var selected_item_id = "";
+    var selected_item_code = "";
+    var item_table_data = [];
+    var item_table_list;
 
     $(document).ready(function() {
         get_products_clients();
@@ -285,6 +303,10 @@
 
     function hideLoader() {
         $('#loader').hide();
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'PHP' }).format(price);
     }
 
     function get_products_clients() {
@@ -354,49 +376,150 @@
 
     function productShowDetails(id) {
         var selectedItem = products.find(product => product.id == id);
+        console.log(selectedItem);
+        selected_item_id = selectedItem.id;
+        selected_item_code = selectedItem.product_item;
         if (selectedItem) {
             $('#item_price_details').val(selectedItem.product_price);
             calculateAmount();
         }
     }
+
+    function vatableSalesToCalculate(total_amount) {
+        return total_amount / 1.12;
+    }
     
     function calculateVatableSales() {
         if(vat_switch) {
             var total_amount = $('#item_total_details').attr('data-total');
-            var vatableSales = total_amount / 1.12;
-            $('#item_vatsales_details').text(formatMoney(vatableSales)).attr('data-vatsales', vatableSales);
+            $('#item_vatsales_details').text(formatMoney(vatableSalesToCalculate(total_amount))).attr('data-vatsales', vatableSalesToCalculate(total_amount));
         }
+    }
+
+    function vatToCalculate(total_amount) {
+        return total_amount - ( total_amount / 1.12 );
     }
 
     function calculateVat() {
         if(vat_switch) {
             var total_amount = $('#item_total_details').attr('data-total');
-            var vatable_sales = total_amount / 1.12;
-            var vat = total_amount - vatable_sales;
-            $('#item_vat_details').text(formatMoney(vat)).attr('data-vat', vat);
+            $('#item_vat_details').text(formatMoney(vatToCalculate(total_amount))).attr('data-vat', vatToCalculate(total_amount));
         }
+    }
+
+    function totalAmountToCalculate(amount, discount, qty) {
+        return amount - (discount * qty);
     }
 
     function calculateTotalAmount() {
         var amount = $('#item_amount_details').attr('data-amount');
         var discount = $('#item_discount_details').val();
         var qty = $('#item_qty_details').val();
-        var total = amount - (discount * qty);
-        $('#item_total_details').text(formatMoney(total)).attr('data-total', total);
+        $('#item_total_details').text(formatMoney(totalAmountToCalculate(amount, discount, qty))).attr('data-total', totalAmountToCalculate(amount, discount, qty));
     }
 
+    function amountToCalculate(price, qty) {
+        return price * qty;
+    }
+    
     function calculateAmount() {
         var price = $('#item_price_details').val();
         var qty = $('#item_qty_details').val();
-        var amount = price * qty;
-        $('#item_amount_details').text(formatMoney(amount)).attr('data-amount', amount);
+        $('#item_amount_details').text(formatMoney(amountToCalculate(price,qty))).attr('data-amount', amountToCalculate(price,qty));
         calculateTotalAmount();
     }
-    
 
     function formatMoney(amount) {
         return amount.toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
     }
+
+    function add_item_details() {
+        var add_item_price = $('#item_price_details').val();
+        var add_item_qty = $('#item_qty_details').val();
+        var add_item_discount = $('#item_discount_details').val();
+
+        if(selected_item_id === "" || selected_item_code === "") {
+            alert("Product is empty.");
+            return;
+        }
+
+        if(add_item_price === "") {
+            alert("Item price is empty.");
+            return;
+        }
+
+        if(add_item_qty === "") {
+            alert("Quantity is empty.");
+            return;
+        }
+
+        add_item_discount = add_item_discount === "" ? 0 : add_item_discount;
+
+        console.log(selected_item_id);
+        console.log(selected_item_code);
+        console.log(add_item_price);
+        console.log(add_item_qty);
+        console.log(add_item_discount);
+        item_table_data.push(
+            {
+                id: selected_item_id,
+                item_code: selected_item_code,
+                item_price: add_item_price,
+                item_qty: add_item_qty,
+                item_discount: add_item_discount,
+                item_vatable_sales: vatableSalesToCalculate(totalAmountToCalculate(amountToCalculate(add_item_price, add_item_qty))),
+                item_vat: vatableSalesToCalculate(totalAmountToCalculate(amountToCalculate(add_item_price, add_item_qty)))
+            }
+        );
+        console.log(item_table_data);
+        item_list_table();
+    }
+
+    function clear_item_fields() {
+
+    }
+
+    function item_list_table() {
+        console.log('item_table_data');
+        console.log(item_table_data);
+        item_table_list = $('#item_list_table').DataTable({
+            destroy: true,
+            data: item_table_data,
+            columns: [
+                { data: 'id', visible: false },
+                { data: 'item_code'},
+                { data: 'item_qty'},
+                { 
+                    data: function(data) {
+                        return formatPrice(amountToCalculate(data.item_price, data.item_qty));
+                    }
+                },
+                { data: 'item_discount'},
+                { 
+                    data: function(data) {
+                        return formatPrice(totalAmountToCalculate(amountToCalculate(data.item_price, data.item_qty), data.item_discount, data.item_qty));
+                    }
+                },
+                { 
+                    data: function(data) {
+                        return formatPrice(data.item_vatable_sales);
+                    }
+                },
+                { 
+                    data: function(data) {
+                        return formatPrice(data.item_vat);
+                    }
+                }
+            ],
+            columnDefs: [
+                { targets: '_all', className: 'content_center' },
+            ],
+            drawCallback: function() {
+
+            }
+        });
+    }
+
 </script>
 
 <?= $this->endSection() ?>
