@@ -14,7 +14,7 @@ class Clients extends Seeder
                 'client_tin' => '232-144-159-000',
                 'client_address' => 'TIBAG BALIUAG BULACAN',
                 'client_business_name' => 'LITO(alt39)S POULTRY AND AGRICULTURAL SUPPLY',
-                'client_term' => 'COD',
+                'client_term' => 'cod',
                 'creator_id' => 1,
                 'updater_id' => 1,
             ],
@@ -23,7 +23,7 @@ class Clients extends Seeder
                 'client_tin' => '',
                 'client_address' => 'SITIO BULALO NORZAGARAY BULACAN',
                 'client_business_name' => '',
-                'client_term' => 'COD',
+                'client_term' => 'cod',
                 'creator_id' => 1,
                 'updater_id' => 1,
             ]

@@ -33,6 +33,22 @@ class Products extends Seeder
                 'creator_id' => 1,
                 'updater_id' => 1,
             ],
+            [
+                'product_name' => 'TOP BREED PUPPY',
+                'product_item' => 'TBP',
+                'product_weight' => '25',
+                'product_price' => 1647,
+                'creator_id' => 1,
+                'updater_id' => 1,
+            ],
+            [
+                'product_name' => 'TOP BREED ADULT',
+                'product_item' => 'TBA',
+                'product_weight' => '25',
+                'product_price' => 1367,
+                'creator_id' => 1,
+                'updater_id' => 1,
+            ],
         ];
 
         // Using Query Builder

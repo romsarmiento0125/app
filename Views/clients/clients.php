@@ -67,7 +67,7 @@
                                     <th class="d-none">ID</th>
                                     <th>Name</th>
                                     <th>TIN&nbsp;Code</th>
-                                    <th>Address&nbsp;(kg)</th>
+                                    <th>Address</th>
                                     <th>Company</th>
                                     <th>Term</th>
                                     <th class='text-center'>Action</th>
