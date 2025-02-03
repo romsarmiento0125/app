@@ -225,8 +225,6 @@
                                                 <th>Discount</th>
                                                 <th>Total&nbsp;Amount</th>
                                                 <th>Action</th>
-                                                <th class="d-none">Vatable&nbsp;Sales</th>
-                                                <th class="d-none">Vat</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -250,24 +248,28 @@
                                         <div class="d-flex">
                                             <div class="">
                                                 <div class="d-flex align-items-center mb-2">
+                                                    <p>Total&nbsp;amount:&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_total_amount"></p>
+                                                </div>
+                                                <div class="d-flex align-items-center mb-2">
                                                     <p>VATable&nbsp;Sales:&nbsp;</p>
-                                                    <p class="fw-bold" id="summary_vatable_sales">&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_vatable_sales"></p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VAT-Exempt&nbsp;Sales:&nbsp;</p>
-                                                    <p class="fw-bold" id="">&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_vat_exempt_sales"></p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VAT-Zero&nbsp;Rated&nbsp;Sales:&nbsp;</p>
-                                                    <p class="fw-bold" id="">&nbsp;</p>
+                                                    <p class="fw-bold">0</p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VAT&nbsp;Amount:&nbsp;</p>
-                                                    <p class="fw-bold" id="">&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_vat_amount">;</p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>TOTAL&nbsp;AMOUNT&nbsp;DUE:&nbsp;</p>
-                                                    <p class="fw-bold" id="">&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_total_amount_due"></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -361,10 +363,6 @@
     function formatPrice(price) {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'PHP' }).format(price);
     }
-
-    // function formatMoney(amount) {
-    //     return amount.toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
-    // }
 
     function roundToTwoDecimals(number) {
         return parseFloat(number.toFixed(2));
@@ -475,7 +473,7 @@
         var amount = $('#item_amount_details').attr('data-amount');
         var discount = 0;
         get_all_discount_value();
-        discount = get_total_discount();
+        discount = table_total_discount(discount_list);
         var qty = $('#item_qty_details').val();
         $('#item_total_details').text(formatPrice(totalAmountToCalculate(amount, discount, qty))).attr('data-total', totalAmountToCalculate(amount, discount, qty));
     }
@@ -495,6 +493,7 @@
         var add_item_price = $('#item_price_details').val();
         var add_item_qty = $('#item_qty_details').val();
         var add_item_discount = 0;
+        var add_item_checkbox = $('#item_switch_details').is(":checked");
         var add_item_vatable_sales = $('#item_vatsales_details').attr('data-vatsales');
         var add_item_vat = $('#item_vat_details').attr('data-vat');
 
@@ -513,17 +512,9 @@
             return;
         }
 
-        // add_item_discount = (add_item_discount === "" || add_item_discount === undefined) ? 0 : add_item_discount;
         add_item_vatable_sales = (add_item_vatable_sales === "" || add_item_vatable_sales === undefined) ? 0 : add_item_vatable_sales;
         add_item_vat = (add_item_vat === "" || add_item_vat === undefined) ? 0 : add_item_vat;
 
-        console.log(selected_item_id);
-        console.log(selected_item_code);
-        console.log(add_item_price);
-        console.log(add_item_qty);
-        console.log(add_item_discount);
-        console.log(add_item_vatable_sales);
-        console.log(add_item_vat);
         item_table_data.push(
             {
                 id: selected_item_id,
@@ -532,12 +523,12 @@
                 item_qty: add_item_qty,
                 item_discount: discount_list,
                 item_vatable_sales: add_item_vatable_sales,
-                item_vat: add_item_vat
+                item_vat: add_item_vat,
+                item_vat_check: add_item_checkbox
             }
         );
-        console.log(item_table_data);
         item_list_table();
-        // compute_vatables();
+        compute_vatables();
     }
 
     function clear_item_fields() {
@@ -560,19 +551,14 @@
                 },
                 { 
                     data: function(data) {
-                        console.log(data.item_discount);
-                        var discount = 0;
-                        data.item_discount.forEach(function(dis) {
-                            console.log(dis.discount);
-                            discount = discount + dis.discount;
-                        });
-                        console.log("table discount: " + discount);
-                        return "discount";
+                        var discount = table_total_discount(data.item_discount);
+                        return formatPrice(discount * data.item_qty);
                     }
                 },
                 { 
                     data: function(data) {
-                        return formatPrice(totalAmountToCalculate(amountToCalculate(data.item_price, data.item_qty), data.item_discount, data.item_qty));
+                        var discount = table_total_discount(data.item_discount);
+                        return formatPrice(totalAmountToCalculate(amountToCalculate(data.item_price, data.item_qty), discount, data.item_qty));
                     }
                 },
                 { 
@@ -581,18 +567,6 @@
                         var remove_button = '<button type="button" class="btn btn-danger mx-1"><i class="fa fa-trash"></i></button>';
                         return edit_button + remove_button;
                     }
-                },
-                { 
-                    data: function(data) {
-                        return data.item_vatable_sales;
-                    },
-                    visible: false
-                },
-                { 
-                    data: function(data) {
-                        return data.item_vat;
-                    },
-                    visible: false
                 }
             ],
             columnDefs: [
@@ -605,10 +579,25 @@
     }
 
     function compute_vatables() {
-        var sum_vat_sale;
+        var sum_tot_amnt = 0;
+        var sum_vat_sales = 0;
+        var sum_vat = 0;
+        var sum_disc = 0;
+        var sum_exempt = 0;
         item_table_data.forEach(function(item) {
-            sum_vat_sale += item.item_vatable_sales;
+            sum_tot_amnt = sum_tot_amnt + (parseFloat(item.item_price) * parseInt(item.item_qty));
+            sum_vat_sales = sum_vat_sales + parseFloat(item.item_vatable_sales);
+            sum_vat = sum_vat + parseFloat(item.item_vat);
+            sum_disc = sum_disc + (table_total_discount(item.item_discount) * parseInt(item.item_qty));
+            if(!item.item_vat_check) {
+                sum_exempt = sum_exempt + ((parseFloat(item.item_price) * parseInt(item.item_qty)) - (table_total_discount(item.item_discount) * parseInt(item.item_qty)));
+            }
         });
+        $('#summary_total_amount').text(formatPrice(roundToTwoDecimals(sum_tot_amnt)));
+        $('#summary_vatable_sales').text(formatPrice(roundToTwoDecimals(sum_vat_sales)));
+        $('#summary_vat_amount').text(formatPrice(roundToTwoDecimals(sum_vat)));
+        $('#summary_total_amount_due').text(formatPrice(roundToTwoDecimals(sum_tot_amnt - sum_disc)));
+        $('#summary_vat_exempt_sales').text(formatPrice(roundToTwoDecimals(sum_exempt)));
     }
 
     function add_discount_input() {
@@ -664,12 +653,12 @@
         }
     }
 
-    function get_total_discount() {
-        var dis = 0;
-        discount_list.forEach(function(discounts){
-            dis += parseFloat(discounts.discount) || 0;
+    function table_total_discount(data) {
+        var disc = 0;
+        data.forEach(function(dis) {
+            disc = disc + parseFloat(dis.discount) || 0;
         });
-        return dis;
+        return disc;
     }
 
 </script>
