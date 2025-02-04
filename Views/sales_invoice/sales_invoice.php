@@ -177,18 +177,6 @@
 
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4">
-                                                <div class="d-flex align-items-center">
-                                                    <p>Discount:&nbsp;</p>
-                                                    <input type="number" class="form-control" id="item_discount_details">
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <p>Discount&nbsp;Label:&nbsp;</p>
-                                                    <input type="number" class="form-control" id="item_discount_details">
-                                                </div>
-                                            </div> -->
                                             <div class="col-2">
                                                 <button type="button" class="btn btn-danger" id="item_remove_discount" onclick="remove_discount_input()"><i class="fa fa-trash"></i></button>
                                                 <button type="button" class="btn btn-success" id="item_add_discount" onclick="add_discount_input()"><i class="fa fa-plus"></i></button>
@@ -234,12 +222,21 @@
                                     <div class="offset-2 col-4">
                                          <div class="d-flex">
                                             <div class="">
-                                                <h4>Discount</h4>
                                                 <div class="d-flex align-items-center mb-2">
-                                                    <p class="fw-bold" id="">50</p>
-                                                    <p class="mx-2">x</p>
-                                                    <p class="fw-bold" id="">40</p>
-                                                    <p class="fw-bold ms-2" id="">Label</p>
+                                                    <p>Freight:&nbsp;</p>
+                                                    <input type="number" class="form-control" id="item_freight_details" value='0'>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                         <div class="d-flex">
+                                            <div class="">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <p>Total&nbsp;amount:&nbsp;</p>
+                                                    <p class="fw-bold" id="summary_total_amount"></p>
+                                                </div>
+                                                <p>Discount:</p>
+                                                <div class="" id="discount_summary">
                                                 </div>
                                             </div>
                                         </div>
@@ -247,10 +244,6 @@
                                     <div class="offset-1 col-5">
                                         <div class="d-flex">
                                             <div class="">
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <p>Total&nbsp;amount:&nbsp;</p>
-                                                    <p class="fw-bold" id="summary_total_amount"></p>
-                                                </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VATable&nbsp;Sales:&nbsp;</p>
                                                     <p class="fw-bold" id="summary_vatable_sales"></p>
@@ -261,11 +254,11 @@
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VAT-Zero&nbsp;Rated&nbsp;Sales:&nbsp;</p>
-                                                    <p class="fw-bold">0</p>
+                                                    <p class="fw-bold" id="summary_zero_rated"></p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>VAT&nbsp;Amount:&nbsp;</p>
-                                                    <p class="fw-bold" id="summary_vat_amount">;</p>
+                                                    <p class="fw-bold" id="summary_vat_amount"></p>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <p>TOTAL&nbsp;AMOUNT&nbsp;DUE:&nbsp;</p>
@@ -277,7 +270,7 @@
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-end">
-                                    <button class="btn btn-secondary me-2" onclick="">Draft</button>
+                                    <button class="btn btn-secondary me-2" onclick="save_sales_invoice_draft()">Draft</button>
                                     <button class="btn btn-success" onclick="">Print</button>
                                 </div>
                             </div>
@@ -492,7 +485,6 @@
     function add_item_details() {
         var add_item_price = $('#item_price_details').val();
         var add_item_qty = $('#item_qty_details').val();
-        var add_item_discount = 0;
         var add_item_checkbox = $('#item_switch_details').is(":checked");
         var add_item_vatable_sales = $('#item_vatsales_details').attr('data-vatsales');
         var add_item_vat = $('#item_vat_details').attr('data-vat');
@@ -529,10 +521,24 @@
         );
         item_list_table();
         compute_vatables();
+        clear_item_fields();
     }
 
     function clear_item_fields() {
-
+        console.log('clear_item_fields');
+        $('#products_details').empty();
+        populateSelect('#products_details', products, 'product_name_item');
+        $('#item_price_details').val('');
+        $('#item_qty_details').val('');
+        $('#item_switch_details').prop('checked', false);
+        vat_switch = false;
+        $('#item_vatsales_details').text('').attr('data-vatsales', '');
+        $('#item_vat_details').text('').attr('data-vat', '');
+        $('#item_amount_details').text('').attr('data-amount', '');
+        $('#item_total_details').text('').attr('data-total', '');
+        $('#add_input_discount').empty();
+        input_counter = 0;
+        add_discount_input();
     }
 
     function item_list_table() {
@@ -579,11 +585,13 @@
     }
 
     function compute_vatables() {
+        $('#discount_summary').empty();
         var sum_tot_amnt = 0;
         var sum_vat_sales = 0;
         var sum_vat = 0;
         var sum_disc = 0;
         var sum_exempt = 0;
+        console.log(item_table_data);
         item_table_data.forEach(function(item) {
             sum_tot_amnt = sum_tot_amnt + (parseFloat(item.item_price) * parseInt(item.item_qty));
             sum_vat_sales = sum_vat_sales + parseFloat(item.item_vatable_sales);
@@ -592,12 +600,14 @@
             if(!item.item_vat_check) {
                 sum_exempt = sum_exempt + ((parseFloat(item.item_price) * parseInt(item.item_qty)) - (table_total_discount(item.item_discount) * parseInt(item.item_qty)));
             }
+            show_discount_summary(item.item_discount, parseInt(item.item_qty));
         });
-        $('#summary_total_amount').text(formatPrice(roundToTwoDecimals(sum_tot_amnt)));
-        $('#summary_vatable_sales').text(formatPrice(roundToTwoDecimals(sum_vat_sales)));
-        $('#summary_vat_amount').text(formatPrice(roundToTwoDecimals(sum_vat)));
-        $('#summary_total_amount_due').text(formatPrice(roundToTwoDecimals(sum_tot_amnt - sum_disc)));
-        $('#summary_vat_exempt_sales').text(formatPrice(roundToTwoDecimals(sum_exempt)));
+        $('#summary_total_amount').text(formatPrice(roundToTwoDecimals(sum_tot_amnt))).attr('data-total-amount', roundToTwoDecimals(sum_tot_amnt));
+        $('#summary_vatable_sales').text(formatPrice(roundToTwoDecimals(sum_vat_sales))).attr('data-vatable-sales', roundToTwoDecimals(sum_vat_sales));
+        $('#summary_vat_amount').text(formatPrice(roundToTwoDecimals(sum_vat))).attr('data-vat-amount', roundToTwoDecimals(sum_vat));
+        $('#summary_total_amount_due').text(formatPrice(roundToTwoDecimals(sum_tot_amnt - sum_disc))).attr('data-total-amount-due', roundToTwoDecimals(sum_tot_amnt - sum_disc));
+        $('#summary_vat_exempt_sales').text(formatPrice(roundToTwoDecimals(sum_exempt))).attr('data-vat-exempt-sales', roundToTwoDecimals(sum_exempt));
+        $('#summary_zero_rated').text('0');
     }
 
     function add_discount_input() {
@@ -659,6 +669,38 @@
             disc = disc + parseFloat(dis.discount) || 0;
         });
         return disc;
+    }
+
+    function show_discount_summary(dis_data, qty) {
+        var disc_sum;
+        dis_data.forEach(function(dis) {
+            if(dis.discount == '') {
+                return;
+            }
+            disc_sum = '<div class="d-flex align-items-center mb-1">' +
+                '<p class="fw-bold">' + dis.discount + '</p>' + 
+                '<p class="mx-2">x</p>' +
+                '<p class="fw-bold">' + qty + '</p>' +
+                '<p class="mx-2">=</p>' +
+                '<p class="fw-bold">' + (dis.discount * qty) + '</p>' +
+                '<p class="fw-bold ms-2">' + dis.label + '</p>' +
+                '</div>';
+            $('#discount_summary').append(disc_sum);
+        });
+    }
+
+    function save_sales_invoice_draft() {
+        var summaryData = {
+            totalAmount: $('#summary_total_amount').attr('data-total-amount'),
+            vatableSales: $('#summary_vatable_sales').attr('data-vatable-sales'),
+            vatAmount: $('#summary_vat_amount').attr('data-vat-amount'),
+            totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
+            vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
+            zeroRated: '0',
+            freightCost: $('#item_freight_details').val()
+        };
+        console.log(summaryData);
+        console.log(item_table_data);
     }
 
 </script>
