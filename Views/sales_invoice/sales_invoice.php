@@ -507,8 +507,13 @@
         add_item_vatable_sales = (add_item_vatable_sales === "" || add_item_vatable_sales === undefined) ? 0 : add_item_vatable_sales;
         add_item_vat = (add_item_vat === "" || add_item_vat === undefined) ? 0 : add_item_vat;
 
+        get_all_discount_value(); // Ensure discount_list is updated before adding the item
+
+        var unique_id = new Date().getTime(); // Generate a unique ID based on the current timestamp
+
         item_table_data.push(
             {
+                unique_id: unique_id,
                 id: selected_item_id,
                 item_code: selected_item_code,
                 item_price: add_item_price,
@@ -569,8 +574,8 @@
                 },
                 { 
                     data: function(data) {
-                        var edit_button = '<button type="button" class="btn btn-warning mx-1"><i class="fa fa-pencil"></i></button>';
-                        var remove_button = '<button type="button" class="btn btn-danger mx-1"><i class="fa fa-trash"></i></button>';
+                        var edit_button = '<button type="button" class="btn btn-warning mx-1 edit_summary_btn"><i class="fa fa-pencil"></i></button>';
+                        var remove_button = '<button type="button" class="btn btn-danger mx-1 remove_summary_btn"><i class="fa fa-trash"></i></button>';
                         return edit_button + remove_button;
                     }
                 }
@@ -579,9 +584,51 @@
                 { targets: '_all', className: 'content_center' },
             ],
             drawCallback: function() {
-
+                initSummaryButton();
             }
         });
+    }
+
+    function initSummaryButton() {
+        $('.edit_summary_btn').off('click');
+        $('.edit_summary_btn').on('click', function() {
+            var data = item_table_list.row($(this).parents('tr')).data();
+            populateSalesInvoiceDetails(data);
+            removeItemFromTable(data.unique_id);
+        });
+
+        $('.remove_summary_btn').off('click');
+        $('.remove_summary_btn').on('click', function() {
+            var data = item_table_list.row($(this).parents('tr')).data();
+            removeItemFromTable(data.unique_id);
+        });
+    }
+
+    function populateSalesInvoiceDetails(data) {
+        $('#products_details').val(data.id).change();
+        $('#item_price_details').val(data.item_price);
+        $('#item_qty_details').val(data.item_qty);
+        $('#item_switch_details').prop('checked', data.item_vat_check);
+        vat_switch = data.item_vat_check;
+        $('#item_vatsales_details').text(formatPrice(data.item_vatable_sales)).attr('data-vatsales', data.item_vatable_sales);
+        $('#item_vat_details').text(formatPrice(data.item_vat)).attr('data-vat', data.item_vat);
+        $('#item_amount_details').text(formatPrice(amountToCalculate(data.item_price, data.item_qty))).attr('data-amount', amountToCalculate(data.item_price, data.item_qty));
+        $('#item_total_details').text(formatPrice(totalAmountToCalculate(amountToCalculate(data.item_price, data.item_qty), table_total_discount(data.item_discount), data.item_qty))).attr('data-total', totalAmountToCalculate(amountToCalculate(data.item_price, data.item_qty), table_total_discount(data.item_discount), data.item_qty));
+        $('#add_input_discount').empty();
+        input_counter = 0;
+        data.item_discount.forEach(function(discount, index) {
+            add_discount_input();
+            $('#item_discount_value_' + (index + 1)).val(discount.discount);
+            $('#item_discount_label_' + (index + 1)).val(discount.label);
+        });
+    }
+
+    function removeItemFromTable(unique_id) {
+        item_table_data = item_table_data.filter(function(item) {
+            return item.unique_id !== unique_id;
+        });
+        item_list_table();
+        compute_vatables();
     }
 
     function compute_vatables() {
@@ -697,9 +744,18 @@
             totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
             vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
             zeroRated: '0',
-            freightCost: $('#item_freight_details').val()
+            freightCost: $('#item_freight_details').val(),
         };
+        var customerDetail = {
+            name: $('#clients_details').val(),
+            tin: $('#client_tin_details').text(),
+            address: $('#client_address_details').text(),
+            company: $('#client_company_details').text(),
+            terms: $('#client_term_details').val(),
+            date: $('#client_date_details').val()
+        }
         console.log(summaryData);
+        console.log(customerDetail);
         console.log(item_table_data);
     }
 
