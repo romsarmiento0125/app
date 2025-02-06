@@ -4,43 +4,27 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class SalesInvoiceItemsList extends Migration
+class SalesInvoiceItemsListDiscount extends Migration
 {
     public function up()
     {
         $fields = [
             'id' => [
                 'type' => 'INT',
-                'constraint' => 11,
+                'constraint' =>11,
                 'auto_increment' => true
             ],
-            'si_id' => [
+            'si_item_id' => [
                 'type' => 'INT',
                 'constraint' => 11,
                 'null' => false,
             ],
-            'si_item_code' => [
+            'discount_label' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255,
             ],
-            'si_item_price' => [
+            'discount' => [
                 'type' => 'DOUBLE',
-            ],
-            'si_item_qty' => [
-                'type' => 'DOUBLE',
-            ],
-            'si_item_vat' => [
-                'type' => 'DOUBLE',
-            ],
-            'si_item_vat_check' => [
-                'type' => 'BOOLEAN',
-            ],
-            'si_item_vatable_sales' => [
-                'type' => 'DOUBLE',
-            ],
-            'si_unique_id' => [
-                'type' => 'VARCHAR',
-                'constraint' => 255,
             ],
             'creator_id' => [
                 'type' => 'VARCHAR',
@@ -58,12 +42,11 @@ class SalesInvoiceItemsList extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        // $this->forge->addForeignKey('discount_id', 'sales_invoice_items_list_discount', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('sales_invoice_items_list');
+        $this->forge->createTable('sales_invoice_items_list_discount');
     }
 
     public function down()
     {
-        $this->forge->dropTable('sales_invoice_items_list');
+        $this->forge->dropTable('sales_invoice_items_list_discount');
     }
 }

@@ -423,6 +423,7 @@
             $('#client_company_details').text(selectedItem.client_business_name);
             $('#client_term_details').val(selectedItem.client_term).change();
             $('#client_date_details').val(new Date().toISOString().split('T')[0]);
+            $('#clients_details').attr('data-client-id', selectedItem.id); // Add this line
         }
     }
 
@@ -744,9 +745,11 @@
             totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
             vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
             zeroRated: '0',
-            freightCost: $('#item_freight_details').val(),
+            freightCost: $('#item_freight_details').val()
         };
+        
         var customerDetail = {
+            id: $('#clients_details').attr('data-client-id'), // Add this line
             name: $('#clients_details').val(),
             tin: $('#client_tin_details').text(),
             address: $('#client_address_details').text(),
@@ -754,9 +757,27 @@
             terms: $('#client_term_details').val(),
             date: $('#client_date_details').val()
         }
-        console.log(summaryData);
-        console.log(customerDetail);
-        console.log(item_table_data);
+
+        var invoiceData = {
+            summary: summaryData,
+            customer: customerDetail,
+            items: item_table_data
+        };
+        console.log(invoiceData);
+
+        $.ajax({
+            url: '<?= base_url('sales_invoice/save_draft') ?>',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(invoiceData),
+            success: function(response) {
+                console.log(response)
+                alert('Draft saved successfully');
+            },
+            error: function() {
+                alert('Failed to save draft');
+            }
+        });
     }
 
 </script>

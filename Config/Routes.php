@@ -13,6 +13,7 @@ $routes->post('/login/logout', 'Login::logout');
 
 $routes->get('/sales_invoice', 'SalesInvoice::index');
 $routes->post('/sales_invoice/get_products_clients', 'SalesInvoice::get_products_clients');
+$routes->post('/sales_invoice/save_draft', 'SalesInvoice::save_draft');
 
 $routes->get('/products', 'Products::index');
 $routes->post('/products/save_product', 'Products::save_product');

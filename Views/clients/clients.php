@@ -332,8 +332,8 @@
         var client_term = $('#client_term').val();
         var client_address = $('#client_address').val();
 
-        if (client_name === '' || client_business_name === '' || client_term === '' || client_address === '') {
-            alert('All fields are required');
+        if (client_name === '' || client_term === '') {
+            alert('Client name and term are required');
             return;
         }
 
@@ -386,8 +386,8 @@
         var client_term = $('#edit_client_term').val();
         var client_address = $('#edit_client_address').val();
 
-        if (client_name === '' || client_business_name === '' || client_term === '' || client_address === '') {
-            alert('All fields are required');
+        if (client_name === '' || client_term === '') {
+            alert('Client name and term are required');
             return;
         }
 
