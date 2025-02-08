@@ -225,6 +225,11 @@
                 dropdownParent: $('#addClientModal')
             });
         });
+        $('#editClientModal').on('shown.bs.modal', function () {
+            $('.select2').select2({
+                dropdownParent: $('#editClientModal')
+            });
+        });
     });
 
     function get_table_clients () {
@@ -309,7 +314,7 @@
             $('#edit_client_name').attr('data-id', data.id);
             $('#edit_client_tin').val(data.client_tin);
             $('#edit_client_business_name').val(data.client_business_name);
-            $('#edit_client_term').val(data.client_term);
+            $('#edit_client_term').val(data.client_term).trigger('change');
             $('#edit_client_address').val(data.client_address);
             $('#editClientModal').modal('show');
         });
