@@ -22,8 +22,8 @@ class SalesInvoice extends BaseController
         return view('sales_invoice/sales_invoice');
     }
 
-    public function get_products_clients() {
-        $result = $this->coreModel->get_products_clients();
+    public function get_products_clients_si() {
+        $result = $this->coreModel->get_products_clients_si();
         
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
@@ -52,6 +52,7 @@ class SalesInvoice extends BaseController
         $vatExemptSales = $summaryData['vatExemptSales'];
         $zeroRated = $summaryData['zeroRated'];
         $freightCost = $summaryData['freightCost'];
+        $si_status = $summaryData['si_status'];
 
         // Extract customer data
         $customerDetail = $data['customer'];
@@ -73,6 +74,7 @@ class SalesInvoice extends BaseController
             $totalAmountDue,
             $freightCost,
             $totalAmount,
+            $si_status,
             $user_id,
             $user_id
         ];
@@ -105,5 +107,63 @@ class SalesInvoice extends BaseController
         } else {
             return json_encode(['invoice' => $insertResult]);
         }
+    }
+
+    function get_sales_invoice_by_id() {
+        $id = $this->request->getJSON(true);
+
+        $result = $this->coreModel->get_sales_invoice_by_id($id);
+
+        if (is_string($result)) {
+            return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
+        }
+
+        $salesInvoice = [];
+        $items = [];
+        $discounts = [];
+
+        foreach ($result as $row) {
+            if (empty($salesInvoice)) {
+                $salesInvoice = [
+                    'id' => $row->id,
+                    'client_id' => $row->client_id,
+                    'client_name' => $row->client_name,
+                    'client_tin' => $row->client_tin,
+                    'client_address' => $row->client_address,
+                    'client_business_name' => $row->client_business_name,
+                    'client_term_name' => $row->client_term,
+                    'client_date' => $row->client_date,
+                    'si_status' => $row->si_status,
+                    'freight_cost' => $row->freight_cost,
+                    'items' => []
+                ];
+            }
+
+            $itemId = $row->si_unique_id;
+            if (!isset($items[$itemId])) {
+                $items[$itemId] = [
+                    'si_item_id' => $row->si_item_id,
+                    'si_item_code' => $row->si_item_code,
+                    'si_item_price' => $row->si_item_price,
+                    'si_item_qty' => $row->si_item_qty,
+                    'si_item_vat' => $row->si_item_vat,
+                    'si_item_vat_check' => $row->si_item_vat_check,
+                    'si_item_vatable_sales' => $row->si_item_vatable_sales,
+                    'si_unique_id' => $row->si_unique_id,
+                    'discounts' => []
+                ];
+            }
+
+            if ($row->discount_label) {
+                $items[$itemId]['discounts'][] = [
+                    'discount_label' => $row->discount_label,
+                    'discount' => $row->discount
+                ];
+            }
+        }
+
+        $salesInvoice['items'] = array_values($items);
+
+        return json_encode($salesInvoice);
     }
 }

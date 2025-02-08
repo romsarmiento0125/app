@@ -212,7 +212,7 @@
                                                 <th>Amount</th>
                                                 <th>Discount</th>
                                                 <th>Total&nbsp;Amount</th>
-                                                <th>Action</th>
+                                                <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -270,7 +270,7 @@
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-end">
-                                    <button class="btn btn-secondary me-2" onclick="save_sales_invoice_draft()">Draft</button>
+                                    <button class="btn btn-secondary me-2" onclick="save_sales_invoice('draft')">Draft</button>
                                     <button class="btn btn-success" onclick="">Print</button>
                                 </div>
                             </div>
@@ -291,7 +291,7 @@
                                                 <th>Terms</th>
                                                 <th>Status</th>
                                                 <th>Date</th>
-                                                <th>Action</th>
+                                                <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -310,6 +310,7 @@
 <script>
     var clients = [];
     var products = [];
+    var sales_invoice = [];
     var vat_switch = false;
     var selected_item_id = "";
     var selected_item_code = "";
@@ -317,9 +318,10 @@
     var item_table_list;
     var input_counter = 0;
     var discount_list = [];
+    var invoice_list_table = [];
 
     $(document).ready(function() {
-        get_products_clients();
+        get_products_clients_si();
         add_discount_input();
         initialize_inputs();
         $('#item_remove_discount').hide();
@@ -385,15 +387,16 @@
         return parseFloat(number.toFixed(2));
     }
 
-    function get_products_clients() {
+    function get_products_clients_si() {
         showLoader();
         $.ajax({
-            url: '<?= base_url('sales_invoice/get_products_clients') ?>',
+            url: '<?= base_url('sales_invoice/get_products_clients_si') ?>',
             type: 'POST',
             success: function(response) {
                 $('#loader').hide();
-                var unsanitizedData = JSON.parse(response); 
-                products = unsanitizedData.products.map(function(product) {
+                var data = JSON.parse(response); 
+                console.log(data);
+                products = data.products.map(function(product) {
                     return {
                         id: product.id,
                         product_name: product.product_name,
@@ -403,7 +406,7 @@
                         product_name_item: product.product_name + ' ( ' + product.product_item + ' )'
                     };
                 });
-                clients = unsanitizedData.clients.map(function(client) {
+                clients = data.clients.map(function(client) {
                     return {
                         id: client.id,
                         client_name: client.client_name,
@@ -414,13 +417,29 @@
                     };
                 });
 
+                sales_invoice = data.sales_invoice.map(function(si) {
+                    return {
+                        id: si.id,
+                        client_name: si.client_name,
+                        client_term: si.client_term,
+                        client_date: si.client_date,
+                        si_status: si.si_status
+                    }
+                });
+
                 populateSelect('#clients_details', clients, 'client_name');
                 populateSelect('#products_details', products, 'product_name_item');
+                sales_invoice_table();
                 
                 hideLoader();
             },
-            error: function() {
-                hideLoader();
+            error: function(xhr) {
+                if (xhr.status === 500) {
+                    var response = JSON.parse(xhr.responseText);
+                    alert(response.error);
+                } else {
+                    alert('Call a system admin.');
+                }
             }
         });
     }
@@ -545,13 +564,13 @@
                 item_vat_check: add_item_checkbox
             }
         );
+        console.log(selected_item_id);
         item_list_table();
         compute_vatables();
         clear_item_fields();
     }
 
     function clear_item_fields() {
-        console.log('clear_item_fields');
         $('#products_details').empty();
         populateSelect('#products_details', products, 'product_name_item');
         $('#item_price_details').val('');
@@ -603,6 +622,7 @@
             ],
             columnDefs: [
                 { targets: '_all', className: 'content_center' },
+                { targets: [7], className: 'text-center' }
             ],
             drawCallback: function() {
                 initSummaryButton();
@@ -626,6 +646,8 @@
     }
 
     function populateSalesInvoiceDetails(data) {
+        console.log('populateSalesInvoiceDetails');
+        console.log(data);
         $('#products_details').val(data.id).change();
         $('#item_price_details').val(data.item_price);
         $('#item_qty_details').val(data.item_qty);
@@ -659,7 +681,6 @@
         var sum_vat = 0;
         var sum_disc = 0;
         var sum_exempt = 0;
-        console.log(item_table_data);
         item_table_data.forEach(function(item) {
             sum_tot_amnt = sum_tot_amnt + (parseFloat(item.item_price) * parseInt(item.item_qty));
             sum_vat_sales = sum_vat_sales + parseFloat(item.item_vatable_sales);
@@ -777,7 +798,7 @@
         $('#client_date_details').val('');
     }
 
-    function save_sales_invoice_draft() {
+    function save_sales_invoice(type) {
         var summaryData = {
             totalAmount: $('#summary_total_amount').attr('data-total-amount'),
             vatableSales: $('#summary_vatable_sales').attr('data-vatable-sales'),
@@ -785,7 +806,8 @@
             totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
             vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
             zeroRated: '0',
-            freightCost: $('#item_freight_details').val()
+            freightCost: $('#item_freight_details').val(),
+            si_status: type
         };
         
         var customerDetail = {
@@ -816,9 +838,9 @@
             contentType: 'application/json',
             data: JSON.stringify(invoiceData),
             success: function(response) {
-                console.log(response);
                 alert('Draft saved successfully');
                 clearTableAndSummary();
+                get_products_clients_si();
             },
             error: function(xhr) {
                 if (xhr.status === 400) {
@@ -829,6 +851,124 @@
                 }
             }
         });
+    }
+
+    function sales_invoice_table() {
+        console.log(sales_invoice);
+        invoice_list_table = $('#invoice_list_table').DataTable({
+            destroy: true,
+            data: sales_invoice,
+            order: [4, 'desc'],
+            columns: [
+                { data: 'id'},
+                { data: 'client_name'},
+                { 
+                    data: function(data) {
+                        var term = '';
+                        switch (data.client_term) {
+                            case 'cod':
+                                term = 'COD';
+                                break;
+                            case '7':
+                                term = '7 Days';
+                                break;
+                            case '15':
+                                term = '15 Days';
+                                break;
+                            case '21':
+                                term = '21 Days';
+                                break;
+                            case '30':
+                                term = '30 Days';
+                                break;
+                            case '45':
+                                term = '45 Days';
+                                break;
+                            case '60':
+                                term = '60 Days';
+                                break;
+                            case 'flex':
+                                term = 'FLEX';
+                                break;
+                        }
+                        return term;
+                    }
+                },
+                { data: 'si_status'},
+                { data: 'client_date'},
+                { 
+                    data: function(data) {
+                        var edit_button = '<button type="button" class="btn btn-warning mx-1 edit_si_btn"><i class="fa fa-pencil"></i></button>';
+                        var print_button = '<button type="button" class="btn btn-primary mx-1 print_si_btn"><i class="fa fa-print"></i></button>';
+                        return edit_button + print_button;
+                    }
+                }
+            ],
+            columnDefs: [
+                { targets: '_all', className: 'content_center' },
+                { targets: [5], className: 'text-center' }
+            ],
+            drawCallback: function() {
+                initSalesInvoiceButton();
+            }
+        });
+    }
+
+    function initSalesInvoiceButton() {
+        $('.edit_si_btn').off('click');
+        $('.edit_si_btn').on('click', function() {
+            var data = invoice_list_table.row($(this).parents('tr')).data();
+            $.ajax({
+                url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data.id),
+                success: function(response) {
+                    console.log(response);
+                    var invoiceData = JSON.parse(response);
+                    populateInvoiceModule(invoiceData);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 500) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.error);
+                    } else {
+                        alert('Call a system admin');
+                    }
+                }
+            });
+        });
+    }
+
+    function populateInvoiceModule(data) {
+        console.log(data);
+        // Populate customer details
+        $('#clients_details').val(data.client_id).change();
+        $('#client_term_details').val(data.client_term_name).change();
+        $('#client_date_details').val(data.client_date);
+
+        // Populate freight cost
+        $('#item_freight_details').val(data.freight_cost);
+
+        // Clear and repopulate item table data
+        item_table_data = [];
+        data.items.forEach(function(item) {
+            console.log(item);
+            console.log(item.si_item_id);
+            item_table_data.push({
+                unique_id: item.si_unique_id,
+                id: item.si_item_id,
+                item_code: item.si_item_code,
+                item_price: item.si_item_price,
+                item_qty: item.si_item_qty,
+                item_discount: item.discounts,
+                item_vatable_sales: item.si_item_vatable_sales,
+                item_vat: item.si_item_vat,
+                item_vat_check: item.si_item_vat_check
+            });
+        });
+        item_list_table();
+        compute_vatables();
     }
 
 </script>

@@ -47,6 +47,10 @@ class SalesInvoice extends Migration
             'total_amount' => [
                 'type' => 'DOUBLE'
             ],
+            'si_status' => [
+                'type' => 'VARCHAR',
+                'constraint' => 255,
+            ],
             'creator_id' => [
                 'type' => 'INT',
                 'constraint' => 11,

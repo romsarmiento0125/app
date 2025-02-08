@@ -129,10 +129,11 @@ class CoreModel extends Model
                 total_amount_due,
                 freight_cost,
                 total_amount,
+                si_status,
                 creator_id,
                 updater_id,
                 archive
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
             $result = $this->db->query($query, $data);
 
@@ -145,7 +146,7 @@ class CoreModel extends Model
             } else {
                 // Transaction successful, commit
                 $this->db->transCommit();
-                $creator_id = $data[10]; // Assuming creator_id is the 11th element in the $data array
+                $creator_id = $data[11]; // Assuming creator_id is the 11th element in the $data array
                 $lastInsertQuery = $this->db->query("SELECT id FROM sales_invoice WHERE creator_id = ? ORDER BY created_at DESC LIMIT 1", [$creator_id])->getResult();
                 return $lastInsertQuery; // Return the last inserted ID and result
             }
@@ -205,6 +206,9 @@ class CoreModel extends Model
             ) VALUES (?, ?, ?)";
 
             foreach ($discounts as $discount) {
+                if (empty($discount['label']) || $discount['discount'] == 0) {
+                    continue; // Skip if label is blank or discount is 0
+                }
                 $params = [
                     $si_item_id,
                     $discount['label'],
@@ -230,16 +234,27 @@ class CoreModel extends Model
         }
     }
 
-    public function get_products_clients()
+    public function get_products_clients_si()
     {
         try {
             $productsQuery = "SELECT * FROM products WHERE archive = 0";
             $clientsQuery = "SELECT * FROM clients WHERE archive = 0";
+            $sales_invoice_query = "SELECT 
+                    si.id,
+                    c.client_name,
+                    si.client_term,
+                    si.client_date,
+                    si.si_status
+                FROM
+                    sales_invoice si
+                        INNER JOIN
+                    clients c ON si.client_id = c.id";
 
             $products = $this->db->query($productsQuery)->getResult();
             $clients = $this->db->query($clientsQuery)->getResult();
+            $sales_invoice = $this->db->query($sales_invoice_query)->getResult();
 
-            return ['products' => $products, 'clients' => $clients];
+            return ['products' => $products, 'clients' => $clients, 'sales_invoice' => $sales_invoice];
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -331,6 +346,37 @@ class CoreModel extends Model
             // Rollback transaction in case of exception
             $this->db->transRollback();
             return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function get_sales_invoice_by_id($id)
+    {
+        try {
+            $query = "SELECT 
+                        si.*, 
+                        c.client_name, 
+                        c.client_tin, 
+                        c.client_address, 
+                        c.client_business_name,
+                        p.id AS si_item_id, 
+                        si_items.si_item_code, 
+                        si_items.si_item_price, 
+                        si_items.si_item_qty, 
+                        si_items.si_item_vat, 
+                        si_items.si_item_vat_check, 
+                        si_items.si_item_vatable_sales, 
+                        si_items.si_unique_id,
+                        si_items_discount.discount_label, 
+                        si_items_discount.discount
+                    FROM sales_invoice si
+                    INNER JOIN clients c ON si.client_id = c.id
+                    LEFT JOIN sales_invoice_items_list si_items ON si.id = si_items.si_id
+                    LEFT JOIN sales_invoice_items_list_discount si_items_discount ON si_items.id = si_items_discount.si_item_id
+                    INNER JOIN products p ON si_items.si_item_code =  p.product_item
+                    WHERE si.id = ?";
+            return $this->db->query($query, [$id])->getResult();
+        } catch (\Exception $e) {
+            return $e->getMessage();
         }
     }
 }
