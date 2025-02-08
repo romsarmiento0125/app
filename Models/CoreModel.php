@@ -282,7 +282,7 @@ class CoreModel extends Model
 
             $this->db->query($query, $params);
 
-            $$this->db->transComplete(); // Complete Transaction
+            $this->db->transComplete(); // Complete Transaction
 
             if ($this->db->transStatus() === false) {
                 // Transaction failed, rollback

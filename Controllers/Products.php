@@ -73,6 +73,15 @@ class Products extends BaseController
         $product_weight = $this->request->getPost('product_weight');
         $product_price = $this->request->getPost('product_price');
 
+        // Check if product name or item already exists
+        $result = $this->coreModel->check_product_exists($product_name, $product_item);
+        if (is_string($result)) {
+            return json_encode(['status' => 'error', 'message' => $result]);
+        }
+        if ($result[0]->count > 0) {
+            return json_encode(['status' => 'exists', 'message' => 'Product already exists']);
+        }
+
         $params = [
             $product_name,
             $product_item,

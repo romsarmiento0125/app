@@ -125,7 +125,6 @@
             success: function(response) {
                 var data = JSON.parse(response);
                 if (data.status === 'success') {
-                    alert(data.message);
                     window.location.href = '<?= base_url('/') ?>';
                 } else {
                     alert('Error: ' + data.message);

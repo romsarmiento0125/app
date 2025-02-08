@@ -120,7 +120,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id='save_product'>Save changes</button>
+        <button type="button" class="btn btn-primary" id='save_product'>Save</button>
       </div>
     </div>
   </div>
