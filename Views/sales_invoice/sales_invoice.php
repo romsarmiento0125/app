@@ -276,6 +276,30 @@
                             </div>
                         </div>
 
+                        <div class="col-12 mb-4">
+                            <div class="sales_invoice_details_box">
+                                <div class="sales_invoice_details_title">
+                                    <p>Invoices</p>
+                                </div>
+                                <hr>
+                                <div class="table-responsive">
+                                    <table id="invoice_list_table" class="table" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>SI_ID</th>
+                                                <th>Name</th>
+                                                <th>Terms</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -372,21 +396,21 @@
                 products = unsanitizedData.products.map(function(product) {
                     return {
                         id: product.id,
-                        product_name: sanitizeOutput(product.product_name),
-                        product_item: sanitizeOutput(product.product_item),
-                        product_weight: sanitizeOutput(product.product_weight),
-                        product_price: sanitizeOutput(product.product_price),
-                        product_name_item: sanitizeOutput(product.product_name + ' ( ' + product.product_item + ' )')
+                        product_name: product.product_name,
+                        product_item: product.product_item,
+                        product_weight: product.product_weight,
+                        product_price: product.product_price,
+                        product_name_item: product.product_name + ' ( ' + product.product_item + ' )'
                     };
                 });
                 clients = unsanitizedData.clients.map(function(client) {
                     return {
                         id: client.id,
-                        client_name: sanitizeOutput(client.client_name),
-                        client_tin: sanitizeOutput(client.client_tin),
-                        client_business_name: sanitizeOutput(client.client_business_name),
-                        client_term: sanitizeOutput(client.client_term),
-                        client_address: sanitizeOutput(client.client_address)
+                        client_name: client.client_name,
+                        client_tin: client.client_tin,
+                        client_business_name: client.client_business_name,
+                        client_term: client.client_term,
+                        client_address: client.client_address
                     };
                 });
 
@@ -399,10 +423,6 @@
                 hideLoader();
             }
         });
-    }
-
-    function sanitizeOutput(input) {
-        return input.replace(/\(alt39\)/g, "'");
     }
 
     function populateSelect(selector, items, textProperty) {
@@ -737,6 +757,26 @@
         });
     }
 
+    function clearTableAndSummary() {
+        item_table_data = [];
+        item_list_table();
+        $('#item_freight_details').val('0');
+        $('#summary_total_amount').text('').attr('data-total-amount', '');
+        $('#summary_vatable_sales').text('').attr('data-vatable-sales', '');
+        $('#summary_vat_amount').text('').attr('data-vat-amount', '');
+        $('#summary_total_amount_due').text('').attr('data-total-amount-due', '');
+        $('#summary_vat_exempt_sales').text('').attr('data-vat-exempt-sales', '');
+        $('#summary_zero_rated').text('0');
+        $('#discount_summary').empty();
+        // Clear customer details
+        $('#clients_details').val('').change();
+        $('#client_tin_details').text('');
+        $('#client_address_details').text('');
+        $('#client_company_details').text('');
+        $('#client_term_details').val('cod').change();
+        $('#client_date_details').val('');
+    }
+
     function save_sales_invoice_draft() {
         var summaryData = {
             totalAmount: $('#summary_total_amount').attr('data-total-amount'),
@@ -763,7 +803,12 @@
             customer: customerDetail,
             items: item_table_data
         };
-        console.log(invoiceData);
+
+        // Validate data
+        if (!summaryData.totalAmount || !summaryData.vatableSales || !summaryData.vatAmount || !summaryData.totalAmountDue || !summaryData.vatExemptSales || !customerDetail.id || !customerDetail.terms || !customerDetail.date || item_table_data.length === 0) {
+            alert('Invalid data. Please fill in all required fields.');
+            return;
+        }
 
         $.ajax({
             url: '<?= base_url('sales_invoice/save_draft') ?>',
@@ -771,11 +816,17 @@
             contentType: 'application/json',
             data: JSON.stringify(invoiceData),
             success: function(response) {
-                console.log(response)
+                console.log(response);
                 alert('Draft saved successfully');
+                clearTableAndSummary();
             },
-            error: function() {
-                alert('Failed to save draft');
+            error: function(xhr) {
+                if (xhr.status === 400) {
+                    var response = JSON.parse(xhr.responseText);
+                    alert(response.error);
+                } else {
+                    alert('Failed to save draft');
+                }
             }
         });
     }

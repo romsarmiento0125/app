@@ -200,16 +200,7 @@
                 $('#loader').show();
             },
             success: function(response) {
-                var unsanitizedData = JSON.parse(response);
-                var data = unsanitizedData.map(function(product) {
-                    return {
-                        id: product.id,
-                        product_name: sanitizeOutput(product.product_name),
-                        product_item: sanitizeOutput(product.product_item),
-                        product_weight: sanitizeOutput(product.product_weight),
-                        product_price: sanitizeOutput(product.product_price)
-                    };
-                });
+                var data = JSON.parse(response);
                 product_table(data);
                 hideLoader();
             },
@@ -295,20 +286,15 @@
             },
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'success') {
-                    alert('Product saved successfully');
+                if (data.status === 'success') {
+                    alert(data.message);
                     get_table_products();
                     clear_modal_fields();
                     $('#addProductModal').modal('hide');
-                }
-                else if (data == 'failed') {
-                    alert('Error saving product');
-                }
-                else if (data == 'exists') {
-                    alert('Product name or item code is already exists');
-                }
-                else {
-                    alert('Contact system administrator');
+                } else if (data.status === 'exists') {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.message);
                 }
                 hideLoader();
             },
@@ -343,16 +329,12 @@
             },
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'success') {
-                    alert('Product edited successfully');
+                if (data.status === 'success') {
+                    alert(data.message);
                     get_table_products();
                     $('#editProductModal').modal('hide');
-                }
-                else if (data == 'failed') {
-                    alert('Error editing product');
-                }
-                else {
-                    alert('Contact system administrator');
+                } else {
+                    alert('Error: ' + data.message);
                 }
                 hideLoader();
             },
@@ -391,10 +373,6 @@
         $('#product_item').val('');
         $('#product_weight').val('');
         $('#product_price').val('');
-    }
-
-    function sanitizeOutput(input) {
-        return input.replace(/\(alt39\)/g, "'");
     }
 </script>
 

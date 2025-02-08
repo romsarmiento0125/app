@@ -23,13 +23,13 @@ class SalesInvoice extends BaseController
     }
 
     public function get_products_clients() {
-        $query1 = "SELECT * FROM products WHERE archive = 0";
-        $query2 = "SELECT * FROM clients WHERE archive = 0";
-
-        $products = $this->coreModel->get_csutom_query($query1);
-        $clients = $this->coreModel->get_csutom_query($query2);
+        $result = $this->coreModel->get_products_clients();
         
-        return json_encode(['products' => $products, 'clients' => $clients]);
+        if (is_string($result)) {
+            return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
+        }
+
+        return json_encode($result);
     }
 
     public function save_draft() {
@@ -37,6 +37,11 @@ class SalesInvoice extends BaseController
         $user_id = $session->get('user_id');
 
         $data = $this->request->getJSON(true);
+
+        // Validate data
+        if (empty($data['summary']) || empty($data['customer']) || empty($data['items'])) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid data. Please fill in all required fields.']);
+        }
 
         // Extract summary data
         $summaryData = $data['summary'];

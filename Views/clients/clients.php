@@ -233,17 +233,7 @@
             url: '<?= base_url('clients/get_table_clients') ?>',
             type: 'POST',
             success: function(response) {
-                var unsanitizeData = JSON.parse(response);
-                var data = unsanitizeData.map(function(client) {
-                    return {
-                        id: client.id,
-                        client_name: sanitizeOutput(client.client_name),
-                        client_tin: sanitizeOutput(client.client_tin),
-                        client_business_name: sanitizeOutput(client.client_business_name),
-                        client_term: sanitizeOutput(client.client_term),
-                        client_address: sanitizeOutput(client.client_address)
-                    };
-                });
+                var data = JSON.parse(response);
                 client_table(data);
                 hideLoader();
             },
@@ -355,20 +345,15 @@
             },
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'success') {
-                    alert('Client added successfully');
+                if (data.status === 'success') {
+                    alert(data.message);
                     get_table_clients();
                     clear_modal_fields();
                     $('#addClientModal').modal('hide');
-                }
-                else if (data == 'failed') {
-                    alert('Error saving client');
-                }
-                else if (data == 'exists') {
-                    alert('Client name or TIN number is already exists');
-                }
-                else {
-                    alert('Contact system administrator');
+                } else if (data.status === 'exists') {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.message);
                 }
                 hideLoader();
             },
@@ -405,16 +390,12 @@
             },
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'success') {
-                    alert('Client edited successfully');
+                if (data.status === 'success') {
+                    alert(data.message);
                     get_table_clients();
                     $('#editClientModal').modal('hide');
-                }
-                else if (data == 'failed') {
-                    alert('Error editing client');
-                }
-                else {
-                    alert('Contact system administrator');
+                } else {
+                    alert('Error: ' + data.message);
                 }
                 hideLoader();
             },
@@ -441,10 +422,6 @@
         $('#client_tin').val('');
         $('#client_business_name').val('');
         $('#client_address').val('');
-    }
-
-    function sanitizeOutput(input) {
-        return input.replace(/\(alt39\)/g, "'");
     }
 </script>
 
