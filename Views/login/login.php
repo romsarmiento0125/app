@@ -55,6 +55,7 @@
                     <label for="password">Password:</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>" />
                 <button type="button" class="btn btn-primary w-100" onclick='userLogin()'>Login</button>
             </div>
         </div>
@@ -105,6 +106,8 @@
     function userLogin() {
         var username = $('#username').val();
         var password = $('#password').val();
+        var csrfName = '<?= csrf_token() ?>';
+        var csrfHash = $('input[name="<?= csrf_token() ?>"]').val();
 
         if (username === '' || password === '') {
             alert('Username and password cannot be empty.');
@@ -116,14 +119,16 @@
             type: 'POST',
             data: {
                 username: username,
-                password: password
+                password: password,
+                [csrfName]: csrfHash
             },
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'success') {
+                if (data.status === 'success') {
+                    alert(data.message);
                     window.location.href = '<?= base_url('/') ?>';
                 } else {
-                    alert('Invalid username or password.');
+                    alert('Error: ' + data.message);
                 }
             }
         });

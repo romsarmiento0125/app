@@ -65,7 +65,7 @@
             type: 'POST',
             success: function(response) {
                 var data = JSON.parse(response);
-                if (data == 'logout') {
+                if (data.status === 'success') {
                     window.location.href = '<?= base_url('login') ?>';
                 }
             }

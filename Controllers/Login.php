@@ -23,29 +23,28 @@ class Login extends BaseController
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
         
-        $query = "SELECT * FROM users WHERE username = '$username'";
-        $user = $this->coreModel->get_csutom_query($query);
+        $result = $this->coreModel->user_login($username);
 
-        if ($user) {
-            if (password_verify($password, $user[0]->password)) {
+        if ($result) {
+            if (password_verify($password, $result[0]->password)) {
                 $session = session();
-                $session->set('user_id', $user[0]->id);
-                $session->set('username', $user[0]->username);
-                $session->set('role', $user[0]->role_id);
+                $session->set('user_id', $result[0]->id);
+                $session->set('username', $result[0]->username);
+                $session->set('role', $result[0]->role_id);
                 $session->set('login', 1);
-                echo json_encode('success');
+                return json_encode(['status' => 'success', 'message' => 'Login success']);
+            } else {
+                return json_encode(['status' => 'error', 'message' => 'Invalid password']);
             }
-            else {
-                echo json_encode('error');
-            }
+        } else {
+            return json_encode(['status' => 'error', 'message' => 'User not found']);
         }
-
     }
 
     public function logout()
     {
         $session = session();
         $session->destroy();
-        echo json_encode('logout');
+        return json_encode(['status' => 'success', 'message' => 'Logged out successfully']);
     }
 }

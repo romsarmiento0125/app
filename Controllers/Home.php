@@ -8,7 +8,6 @@ class Home extends BaseController
     {
         $session = session();
         $login = $session->get('login');
-        // echo $login;
         if($login != 1) {
             return redirect()->to(base_url('login'));
         }

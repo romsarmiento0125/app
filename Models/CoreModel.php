@@ -12,57 +12,12 @@ class CoreModel extends Model
         $this->db = \Config\Database::connect();
     }
 
-    public function get_csutom_query($query)
+    public function user_login($username)
     {
         try {
-            return $this->db->query($query)->getResult();
+            $query = "SELECT * FROM users WHERE username = ?";
+            return $this->db->query($query, [$username])->getResult();
         } catch (\Exception $e) {
-            return $e->getMessage();
-        }
-    }
-
-    public function insert_custom_query($query)
-    {
-        try {
-            $this->db->transStart(); // Start Transaction
-            $this->db->query($query);
-            $this->db->transComplete(); // Complete Transaction
-
-            if ($this->db->transStatus() === false) {
-                // Transaction failed, rollback
-                $this->db->transRollback();
-                return 'failed';
-            } else {
-                // Transaction successful, commit
-                $this->db->transCommit();
-                return 'success';
-            }
-        } catch (\Exception $e) {
-            // Rollback transaction in case of exception
-            $this->db->transRollback();
-            return $e->getMessage();
-        }
-    }
-
-    public function update_custom_query($query)
-    {
-        try {
-            $this->db->transStart(); // Start Transaction
-            $this->db->query($query);
-            $this->db->transComplete(); // Complete Transaction
-
-            if ($this->db->transStatus() === false) {
-                // Transaction failed, rollback
-                $this->db->transRollback();
-                return 'failed';
-            } else {
-                // Transaction successful, commit
-                $this->db->transCommit();
-                return 'success';
-            }
-        } catch (\Exception $e) {
-            // Rollback transaction in case of exception
-            $this->db->transRollback();
             return $e->getMessage();
         }
     }
@@ -327,7 +282,7 @@ class CoreModel extends Model
 
             $this->db->query($query, $params);
 
-            $this->db->transComplete(); // Complete Transaction
+            $$this->db->transComplete(); // Complete Transaction
 
             if ($this->db->transStatus() === false) {
                 // Transaction failed, rollback
