@@ -292,8 +292,7 @@
                                                 <th>Name</th>
                                                 <th>Terms</th>
                                                 <th>Status</th>
-                                                <!-- Remove the date column -->
-                                                <!-- <th>Date</th> -->
+                                                <th>Date</th>
                                                 <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
@@ -427,7 +426,8 @@
                         client_name: si.client_name,
                         client_term: si.client_term,
                         client_date: si.client_date,
-                        si_status: si.si_status
+                        si_status: si.si_status,
+                        si_date: si.updated_at
                     }
                 });
 
@@ -875,6 +875,7 @@
     }
 
     function sales_invoice_table() {
+        console.log('sales_invoice');
         console.log(sales_invoice);
         invoice_list_table = $('#invoice_list_table').DataTable({
             destroy: true,
@@ -916,6 +917,11 @@
                     }
                 },
                 { data: 'si_status'},
+                { data: 'si_date', render: function(data) {
+                    var date = new Date(data);
+                    var options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString('en-US', options);
+                }},
                 { 
                     data: function(data) {
                         var edit_button = '<button type="button" class="btn btn-warning mx-1 edit_si_btn"><i class="fa fa-pencil"></i></button>';
@@ -926,7 +932,7 @@
             ],
             columnDefs: [
                 { targets: '_all', className: 'content_center' },
-                { targets: [4], className: 'text-center' }
+                { targets: [5], className: 'text-center' }
             ],
             drawCallback: function() {
                 initSalesInvoiceButton();
@@ -1080,15 +1086,7 @@
             return;
         }
 
-        // Check if there are any changes
-        if (deepEqual(invoiceData, originalInvoiceData)) {
-            alert('No changes made.');
-            return;
-        } else {
-            console.log('Changes detected:');
-            console.log('Original:', originalInvoiceData);
-            console.log('Current:', invoiceData);
-        }
+        console.log(invoiceData);
 
         $.ajax({
             url: '<?= base_url('sales_invoice/update_draft') ?>',

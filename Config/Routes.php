@@ -15,6 +15,7 @@ $routes->get('/sales_invoice', 'SalesInvoice::index');
 $routes->post('/sales_invoice/get_products_clients_si', 'SalesInvoice::get_products_clients_si');
 $routes->post('/sales_invoice/save_draft', 'SalesInvoice::save_draft');
 $routes->post('/sales_invoice/get_sales_invoice_by_id', 'SalesInvoice::get_sales_invoice_by_id');
+$routes->post('/sales_invoice/update_draft', 'SalesInvoice::update_draft');
 
 $routes->get('/products', 'Products::index');
 $routes->post('/products/save_product', 'Products::save_product');

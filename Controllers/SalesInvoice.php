@@ -58,8 +58,6 @@ class SalesInvoice extends BaseController
         $customerDetail = $data['customer'];
         $customerId = $customerDetail['id'];
         $customerTerms = $customerDetail['terms'];
-        // Remove the date field
-        // $customerDate = $customerDetail['date'];
 
         // Extract items data
         $items = $data['items'];
@@ -67,8 +65,6 @@ class SalesInvoice extends BaseController
         $params = [
             $customerId,
             $customerTerms,
-            // Remove the date field
-            // $customerDate,
             $vatableSales,
             $vatExemptSales,
             $zeroRated,
@@ -111,6 +107,82 @@ class SalesInvoice extends BaseController
         }
     }
 
+    public function update_draft() {
+        $session = session();
+        $user_id = $session->get('user_id');
+
+        $data = $this->request->getJSON(true);
+
+        // Validate data
+        if (empty($data['summary']) || empty($data['customer']) || empty($data['items'])) {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Invalid data. Please fill in all required fields.']);
+        }
+
+        // Extract summary data
+        $summaryData = $data['summary'];
+        $totalAmount = $summaryData['totalAmount'];
+        $vatableSales = $summaryData['vatableSales'];
+        $vatAmount = $summaryData['vatAmount'];
+        $totalAmountDue = $summaryData['totalAmountDue'];
+        $vatExemptSales = $summaryData['vatExemptSales'];
+        $zeroRated = $summaryData['zeroRated'];
+        $freightCost = $summaryData['freightCost'];
+        $si_status = $summaryData['si_status'];
+
+        // Extract customer data
+        $customerDetail = $data['customer'];
+        $customerId = $customerDetail['id'];
+        $customerTerms = $customerDetail['terms'];
+
+        // Extract items data
+        $items = $data['items'];
+
+        $params = [
+            $customerId,
+            $customerTerms,
+            $vatableSales,
+            $vatExemptSales,
+            $zeroRated,
+            $vatAmount,
+            $totalAmountDue,
+            $freightCost,
+            $totalAmount,
+            $si_status,
+            $user_id,
+            $user_id,
+            $data['id'] // Add the sales invoice ID for updating
+        ];
+
+        return json_encode(['status' => 'success']);
+
+        // $updateResult = $this->coreModel->update_sales_invoice($params);
+
+        // if ($updateResult === 'success') {
+        //     foreach ($items as $item) {
+        //         $params = [
+        //             $data['id'], // Use the sales invoice ID for updating items
+        //             $item['item_code'],
+        //             $item['item_price'],
+        //             $item['item_qty'],
+        //             $item['item_vat'],
+        //             $item['item_vat_check'],
+        //             $item['item_vatable_sales'],
+        //             $item['unique_id']
+        //         ];
+        //         $lastItemResult = $this->coreModel->update_sales_invoice_items($params);
+
+        //         if (isset($item['item_discount'])) {
+        //             $si_item_id = $lastItemResult[0]->id; // Get the last inserted ID for the item
+        //             $this->coreModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id);
+        //         }
+        //     }
+
+        //     return json_encode(['status' => 'success']);
+        // } else {
+        //     return json_encode(['status' => 'failed', 'message' => $updateResult]);
+        // }
+    }
+
     function get_sales_invoice_by_id() {
         $id = $this->request->getJSON(true);
 
@@ -134,8 +206,6 @@ class SalesInvoice extends BaseController
                     'client_address' => $row->client_address,
                     'client_business_name' => $row->client_business_name,
                     'client_term_name' => $row->client_term,
-                    // Remove the date field
-                    // 'client_date' => $row->client_date,
                     'si_status' => $row->si_status,
                     'freight_cost' => $row->freight_cost,
                     'items' => []

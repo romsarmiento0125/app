@@ -132,7 +132,7 @@ class CoreModel extends Model
                 creator_id,
                 updater_id,
                 archive
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
             $result = $this->db->query($query, $data);
 
@@ -152,6 +152,86 @@ class CoreModel extends Model
         } catch (\Exception $e) {
             // Rollback transaction in case of exception
             $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
+
+    public function update_sales_invoice($data)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            $query = "UPDATE sales_invoice SET 
+                client_id = ?,
+                client_term = ?,
+                vatable_sales = ?,
+                vat_exempt_sales = ?,
+                zero_rated = ?,
+                vat_amount = ?,
+                total_amount_due = ?,
+                freight_cost = ?,
+                total_amount = ?,
+                si_status = ?,
+                updater_id = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND archive = 0";
+
+            $this->db->query($query, $data);
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                log_message('error', 'Failed to update sales invoice: ' . json_encode($data));
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success';
+            }
+        } catch (\Exception $e) {
+            // Rollback transaction in case of exception
+            $this->db->transRollback();
+            log_message('error', 'Exception while updating sales invoice: ' . $e->getMessage());
+            return $e->getMessage();
+        }
+    }
+
+    public function update_sales_invoice_items($params)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            $query = "UPDATE sales_invoice_items_list SET 
+                si_item_code = ?,
+                si_item_price = ?,
+                si_item_qty = ?,
+                si_item_vat = ?,
+                si_item_vat_check = ?,
+                si_item_vatable_sales = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE si_id = ? AND si_unique_id = ?";
+
+            $this->db->query($query, $params);
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                log_message('error', 'Failed to update sales invoice item: ' . json_encode($params));
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                $unique_id = $params[7]; // Assuming unique_id is the 8th element in the $params array
+                $lastInsertQuery = $this->db->query("SELECT id FROM sales_invoice_items_list WHERE si_unique_id = ? ORDER BY updated_at DESC LIMIT 1", [$unique_id])->getResult();
+                return $lastInsertQuery; // Return the last inserted ID and result
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            log_message('error', 'Exception while updating sales invoice item: ' . $e->getMessage());
             return $e->getMessage();
         }
     }
@@ -189,6 +269,53 @@ class CoreModel extends Model
             }
         } catch (\Exception $e) {
             $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
+
+    public function update_sales_invoice_items_discounts($discounts, $si_item_id)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            // First, delete existing discounts for the item
+            $deleteQuery = "DELETE FROM sales_invoice_items_list_discount WHERE si_item_id = ?";
+            $this->db->query($deleteQuery, [$si_item_id]);
+
+            // Then, insert the new discounts
+            $insertQuery = "INSERT INTO sales_invoice_items_list_discount (
+                si_item_id,
+                discount_label,
+                discount
+            ) VALUES (?, ?, ?)";
+
+            foreach ($discounts as $discount) {
+                if (empty($discount['label']) || $discount['discount'] == 0) {
+                    continue; // Skip if label is blank or discount is 0
+                }
+                $params = [
+                    $si_item_id,
+                    $discount['label'],
+                    $discount['discount']
+                ];
+                $this->db->query($insertQuery, $params);
+            }
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                log_message('error', 'Failed to update sales invoice item discounts: ' . json_encode($discounts));
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success';
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            log_message('error', 'Exception while updating sales invoice item discounts: ' . $e->getMessage());
             return $e->getMessage();
         }
     }
@@ -242,7 +369,8 @@ class CoreModel extends Model
                     si.id,
                     c.client_name,
                     si.client_term,
-                    si.si_status
+                    si.si_status,
+                    si.updated_at
                 FROM
                     sales_invoice si
                         INNER JOIN
