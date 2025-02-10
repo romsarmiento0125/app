@@ -49,6 +49,25 @@
         <button id="logout_button" class="btn btn-primary"><i class="fa fa-sign-out" aria-hidden="true"></i></button>
     <?php endif; ?>
 
+    <!-- Universal Modal -->
+    <div class="modal fade" id="universalModal" tabindex="-1" aria-labelledby="universalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="universalModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to continue this action?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmAction">Yes, Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="<?= base_url('assets/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="<?= base_url('assets/datatables/datatables.min.js') ?>"></script>
     <script src="<?= base_url('assets/admin_lte/plugins/select2/js/select2.full.min.js')?>"></script>
@@ -57,20 +76,31 @@
     <script>
         $(document).ready(function() {
             $('.select2').select2();
-        });
 
-        $('#logout_button').click(function() {
-            $.ajax({
-            url: '<?= base_url('login/logout') ?>',
-            type: 'POST',
-            success: function(response) {
-                var data = JSON.parse(response);
-                if (data.status === 'success') {
-                    window.location.href = '<?= base_url('login') ?>';
-                }
-            }
+            // Universal Modal Handler
+            window.showUniversalModal = function(callback) {
+                $('#universalModal').modal('show');
+                $('#confirmAction').off('click').on('click', function() {
+                    callback();
+                    $('#universalModal').modal('hide');
+                });
+            };
+
+            $('#logout_button').click(function() {
+                showUniversalModal(function() {
+                    $.ajax({
+                        url: '<?= base_url('login/logout') ?>',
+                        type: 'POST',
+                        success: function(response) {
+                            var data = JSON.parse(response);
+                            if (data.status === 'success') {
+                                window.location.href = '<?= base_url('login') ?>';
+                            }
+                        }
+                    });
+                });
+            });
         });
-    });
     </script>
 </body>
 </html>

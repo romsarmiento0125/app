@@ -58,7 +58,8 @@ class SalesInvoice extends BaseController
         $customerDetail = $data['customer'];
         $customerId = $customerDetail['id'];
         $customerTerms = $customerDetail['terms'];
-        $customerDate = $customerDetail['date'];
+        // Remove the date field
+        // $customerDate = $customerDetail['date'];
 
         // Extract items data
         $items = $data['items'];
@@ -66,7 +67,8 @@ class SalesInvoice extends BaseController
         $params = [
             $customerId,
             $customerTerms,
-            $customerDate,
+            // Remove the date field
+            // $customerDate,
             $vatableSales,
             $vatExemptSales,
             $zeroRated,
@@ -132,7 +134,8 @@ class SalesInvoice extends BaseController
                     'client_address' => $row->client_address,
                     'client_business_name' => $row->client_business_name,
                     'client_term_name' => $row->client_term,
-                    'client_date' => $row->client_date,
+                    // Remove the date field
+                    // 'client_date' => $row->client_date,
                     'si_status' => $row->si_status,
                     'freight_cost' => $row->freight_cost,
                     'items' => []

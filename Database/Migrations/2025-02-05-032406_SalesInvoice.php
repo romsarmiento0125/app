@@ -23,9 +23,6 @@ class SalesInvoice extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 255,
             ],
-            'client_date' => [
-                'type' => 'DATE',
-            ],
             'vatable_sales' => [
                 'type' => 'DOUBLE'
             ],

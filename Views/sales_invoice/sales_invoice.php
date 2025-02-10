@@ -108,8 +108,9 @@
                                             </div>
                                             <div class="col-6 content_center">
                                                 <div class="d-flex justify-content-end align-items-center">
-                                                    <p>Date:&nbsp;</p>
-                                                    <input type="date" class="form-control" id="client_date_details">
+                                                    <!-- Remove the date field -->
+                                                    <!-- <p>Date:&nbsp;</p>
+                                                    <input type="date" class="form-control" id="client_date_details" disabled> -->
                                                 </div>
                                             </div>
                                         </div>
@@ -270,7 +271,8 @@
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-end">
-                                    <button class="btn btn-secondary me-2" onclick="save_sales_invoice('draft')">Draft</button>
+                                    <button class="btn btn-secondary me-2" id="update_draft_btn" style="display: none;" onclick="update_sales_invoice('draft')">Update Draft</button>
+                                    <button class="btn btn-secondary me-2" id="draft_btn" onclick="save_sales_invoice('draft')">Draft</button>
                                     <button class="btn btn-success" onclick="">Print</button>
                                 </div>
                             </div>
@@ -290,7 +292,8 @@
                                                 <th>Name</th>
                                                 <th>Terms</th>
                                                 <th>Status</th>
-                                                <th>Date</th>
+                                                <!-- Remove the date column -->
+                                                <!-- <th>Date</th> -->
                                                 <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
@@ -319,6 +322,7 @@
     var input_counter = 0;
     var discount_list = [];
     var invoice_list_table = [];
+    var originalInvoiceData = {};
 
     $(document).ready(function() {
         get_products_clients_si();
@@ -461,7 +465,8 @@
             $('#client_address_details').text(selectedItem.client_address);
             $('#client_company_details').text(selectedItem.client_business_name);
             $('#client_term_details').val(selectedItem.client_term).change();
-            $('#client_date_details').val(new Date().toISOString().split('T')[0]);
+            // Remove setting the date
+            // $('#client_date_details').val(new Date().toISOString().split('T')[0]);
             $('#clients_details').attr('data-client-id', selectedItem.id); // Add this line
         }
     }
@@ -587,6 +592,7 @@
     }
 
     function item_list_table() {
+        console.log(item_table_data);
         item_table_list = $('#item_list_table').DataTable({
             destroy: true,
             data: item_table_data,
@@ -660,6 +666,7 @@
         $('#add_input_discount').empty();
         input_counter = 0;
         data.item_discount.forEach(function(discount, index) {
+            console.log("dicount");
             add_discount_input();
             $('#item_discount_value_' + (index + 1)).val(discount.discount);
             $('#item_discount_label_' + (index + 1)).val(discount.label);
@@ -795,7 +802,8 @@
         $('#client_address_details').text('');
         $('#client_company_details').text('');
         $('#client_term_details').val('cod').change();
-        $('#client_date_details').val('');
+        // Remove clearing the date field
+        // $('#client_date_details').val('');
     }
 
     function save_sales_invoice(type) {
@@ -816,8 +824,9 @@
             tin: $('#client_tin_details').text(),
             address: $('#client_address_details').text(),
             company: $('#client_company_details').text(),
-            terms: $('#client_term_details').val(),
-            date: $('#client_date_details').val()
+            terms: $('#client_term_details').val()
+            // Remove the date field
+            // date: $('#client_date_details').val()
         }
 
         var invoiceData = {
@@ -827,8 +836,20 @@
         };
 
         // Validate data
-        if (!summaryData.totalAmount || !summaryData.vatableSales || !summaryData.vatAmount || !summaryData.totalAmountDue || !summaryData.vatExemptSales || !customerDetail.id || !customerDetail.terms || !customerDetail.date || item_table_data.length === 0) {
-            alert('Invalid data. Please fill in all required fields.');
+        var missingFields = [];
+        if (!summaryData.totalAmount) missingFields.push('Total Amount');
+        if (!summaryData.vatableSales) missingFields.push('VATable Sales');
+        if (!summaryData.vatAmount) missingFields.push('VAT Amount');
+        if (!summaryData.totalAmountDue) missingFields.push('Total Amount Due');
+        if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
+        if (!customerDetail.id) missingFields.push('Customer Name');
+        if (!customerDetail.terms) missingFields.push('Customer Terms');
+        // Remove the date field validation
+        // if (!customerDetail.date) missingFields.push('Customer Date');
+        if (item_table_data.length === 0) missingFields.push('Items');
+
+        if (missingFields.length > 0) {
+            alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
             return;
         }
 
@@ -858,7 +879,7 @@
         invoice_list_table = $('#invoice_list_table').DataTable({
             destroy: true,
             data: sales_invoice,
-            order: [4, 'desc'],
+            order: [0, 'desc'], // Change the order to use the first column (SI_ID)
             columns: [
                 { data: 'id'},
                 { data: 'client_name'},
@@ -895,7 +916,6 @@
                     }
                 },
                 { data: 'si_status'},
-                { data: 'client_date'},
                 { 
                     data: function(data) {
                         var edit_button = '<button type="button" class="btn btn-warning mx-1 edit_si_btn"><i class="fa fa-pencil"></i></button>';
@@ -906,7 +926,7 @@
             ],
             columnDefs: [
                 { targets: '_all', className: 'content_center' },
-                { targets: [5], className: 'text-center' }
+                { targets: [4], className: 'text-center' }
             ],
             drawCallback: function() {
                 initSalesInvoiceButton();
@@ -918,26 +938,45 @@
         $('.edit_si_btn').off('click');
         $('.edit_si_btn').on('click', function() {
             var data = invoice_list_table.row($(this).parents('tr')).data();
-            $.ajax({
-                url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data.id),
-                success: function(response) {
-                    console.log(response);
-                    var invoiceData = JSON.parse(response);
-                    populateInvoiceModule(invoiceData);
-                },
-                error: function(xhr) {
-                    if (xhr.status === 500) {
-                        var response = JSON.parse(xhr.responseText);
-                        alert(response.error);
-                    } else {
-                        alert('Call a system admin');
+            showUniversalModal(function() {
+                $.ajax({
+                    url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data.id),
+                    success: function(response) {
+                        console.log(response);
+                        var invoiceData = JSON.parse(response);
+                        clear_item_fields(); // Clear the items part
+                        populateInvoiceModule(invoiceData);
+                        $('#update_draft_btn').show(); // Show the update draft button
+                        $('#draft_btn').hide(); // Hide the draft button
+                        originalInvoiceData = JSON.parse(JSON.stringify(invoiceData)); // Store original data for comparison
+                        makeCustomerDetailsNonEditable(); // Make customer details non-editable
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 500) {
+                            var response = JSON.parse(xhr.responseText);
+                            alert(response.error);
+                        } else {
+                            alert('Call a system admin');
+                        }
                     }
-                }
+                });
             });
         });
+    }
+
+    function makeCustomerDetailsNonEditable() {
+        $('#clients_details').prop('disabled', true);
+        // Remove making the date field non-editable
+        // $('#client_date_details').prop('disabled', true);
+    }
+
+    function makeCustomerDetailsEditable() {
+        $('#clients_details').prop('disabled', false);
+        // Remove making the date field editable
+        // $('#client_date_details').prop('disabled', false);
     }
 
     function populateInvoiceModule(data) {
@@ -945,7 +984,8 @@
         // Populate customer details
         $('#clients_details').val(data.client_id).change();
         $('#client_term_details').val(data.client_term_name).change();
-        $('#client_date_details').val(data.client_date);
+        // Remove setting the date
+        // $('#client_date_details').val(data.client_date);
 
         // Populate freight cost
         $('#item_freight_details').val(data.freight_cost);
@@ -955,20 +995,123 @@
         data.items.forEach(function(item) {
             console.log(item);
             console.log(item.si_item_id);
+            console.log(item.si_item_vat_check);
             item_table_data.push({
                 unique_id: item.si_unique_id,
                 id: item.si_item_id,
                 item_code: item.si_item_code,
                 item_price: item.si_item_price,
                 item_qty: item.si_item_qty,
-                item_discount: item.discounts,
+                item_discount: item.discounts.length > 0 ? item.discounts : [{ label: '', discount: '' }], // Insert blank discount if no value
                 item_vatable_sales: item.si_item_vatable_sales,
                 item_vat: item.si_item_vat,
-                item_vat_check: item.si_item_vat_check
+                item_vat_check: item.si_item_vat_check === '1' // Convert to boolean
             });
         });
         item_list_table();
         compute_vatables();
+    }
+
+    function deepEqual(obj1, obj2) {
+        if (obj1 === obj2) return true;
+
+        if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+            return false;
+        }
+
+        let keys1 = Object.keys(obj1);
+        let keys2 = Object.keys(obj2);
+
+        if (keys1.length !== keys2.length) return false;
+
+        for (let key of keys1) {
+            if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function update_sales_invoice(type) {
+        var summaryData = {
+            totalAmount: $('#summary_total_amount').attr('data-total-amount'),
+            vatableSales: $('#summary_vatable_sales').attr('data-vatable-sales'),
+            vatAmount: $('#summary_vat_amount').attr('data-vat-amount'),
+            totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
+            vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
+            zeroRated: '0',
+            freightCost: $('#item_freight_details').val(),
+            si_status: type
+        };
+        
+        var customerDetail = {
+            id: $('#clients_details').attr('data-client-id'),
+            name: $('#clients_details').val(),
+            tin: $('#client_tin_details').text(),
+            address: $('#client_address_details').text(),
+            company: $('#client_company_details').text(),
+            terms: $('#client_term_details').val()
+            // Remove the date field
+            // date: $('#client_date_details').val()
+        }
+
+        var invoiceData = {
+            summary: summaryData,
+            customer: customerDetail,
+            items: item_table_data
+        };
+
+        // Validate data
+        var missingFields = [];
+        if (!summaryData.totalAmount) missingFields.push('Total Amount');
+        if (!summaryData.vatableSales) missingFields.push('VATable Sales');
+        if (!summaryData.vatAmount) missingFields.push('VAT Amount');
+        if (!summaryData.totalAmountDue) missingFields.push('Total Amount Due');
+        if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
+        if (!customerDetail.id) missingFields.push('Customer Name');
+        if (!customerDetail.terms) missingFields.push('Customer Terms');
+        // Remove the date field validation
+        // if (!customerDetail.date) missingFields.push('Customer Date');
+        if (item_table_data.length === 0) missingFields.push('Items');
+
+        if (missingFields.length > 0) {
+            alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
+            return;
+        }
+
+        // Check if there are any changes
+        if (deepEqual(invoiceData, originalInvoiceData)) {
+            alert('No changes made.');
+            return;
+        } else {
+            console.log('Changes detected:');
+            console.log('Original:', originalInvoiceData);
+            console.log('Current:', invoiceData);
+        }
+
+        $.ajax({
+            url: '<?= base_url('sales_invoice/update_draft') ?>',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(invoiceData),
+            success: function(response) {
+                alert('Draft updated successfully');
+                clearTableAndSummary();
+                get_products_clients_si();
+                $('#update_draft_btn').hide(); // Hide the update draft button
+                $('#draft_btn').show(); // Show the draft button
+                makeCustomerDetailsEditable(); // Make customer details editable again
+            },
+            error: function(xhr) {
+                if (xhr.status === 400) {
+                    var response = JSON.parse(xhr.responseText);
+                    alert(response.error);
+                } else {
+                    alert('Failed to update draft');
+                }
+            }
+        });
     }
 
 </script>

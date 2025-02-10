@@ -121,7 +121,6 @@ class CoreModel extends Model
             $query = "INSERT INTO sales_invoice (
                 client_id,
                 client_term,
-                client_date,
                 vatable_sales,
                 vat_exempt_sales,
                 zero_rated,
@@ -133,7 +132,7 @@ class CoreModel extends Model
                 creator_id,
                 updater_id,
                 archive
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
 
             $result = $this->db->query($query, $data);
 
@@ -243,7 +242,6 @@ class CoreModel extends Model
                     si.id,
                     c.client_name,
                     si.client_term,
-                    si.client_date,
                     si.si_status
                 FROM
                     sales_invoice si
