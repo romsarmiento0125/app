@@ -211,7 +211,7 @@ class CoreModel extends Model
                 si_item_vat_check = ?,
                 si_item_vatable_sales = ?,
                 updated_at = CURRENT_TIMESTAMP
-                WHERE si_id = ? AND si_unique_id = ?";
+                WHERE id = ?";
 
             $this->db->query($query, $params);
 
@@ -225,9 +225,7 @@ class CoreModel extends Model
             } else {
                 // Transaction successful, commit
                 $this->db->transCommit();
-                $unique_id = $params[7]; // Assuming unique_id is the 8th element in the $params array
-                $lastInsertQuery = $this->db->query("SELECT id FROM sales_invoice_items_list WHERE si_unique_id = ? ORDER BY updated_at DESC LIMIT 1", [$unique_id])->getResult();
-                return $lastInsertQuery; // Return the last inserted ID and result
+                return 'success'; // Return the last inserted ID and result
             }
         } catch (\Exception $e) {
             $this->db->transRollback();
@@ -479,12 +477,13 @@ class CoreModel extends Model
     {
         try {
             $query = "SELECT 
-                        si.*, 
-                        c.client_name, 
-                        c.client_tin, 
-                        c.client_address, 
-                        c.client_business_name,
-                        p.id AS si_item_id, 
+                        si.id AS id,
+                        si.client_id AS client_id,
+                        si.client_term AS client_term,
+                        si.si_status AS si_status,
+                        si.freight_cost AS freight_cost,
+                        p.id AS product_id,
+                        si_items.id AS si_item_id, 
                         si_items.si_item_code, 
                         si_items.si_item_price, 
                         si_items.si_item_qty, 
@@ -495,7 +494,6 @@ class CoreModel extends Model
                         si_items_discount.discount_label, 
                         si_items_discount.discount
                     FROM sales_invoice si
-                    INNER JOIN clients c ON si.client_id = c.id
                     LEFT JOIN sales_invoice_items_list si_items ON si.id = si_items.si_id
                     LEFT JOIN sales_invoice_items_list_discount si_items_discount ON si_items.id = si_items_discount.si_item_id
                     INNER JOIN products p ON si_items.si_item_code =  p.product_item

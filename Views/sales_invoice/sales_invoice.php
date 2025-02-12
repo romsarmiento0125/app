@@ -60,7 +60,7 @@
         <div class="col-12">
             <div class="sales_invoice_box">
                 <div class="sales_invoice_title">
-                    <p>Sales Invoice</p>
+                    <p id="si_id">Sales Invoice</p>
                 </div>
                 <hr>
                 <div class="">
@@ -314,7 +314,9 @@
     var products = [];
     var sales_invoice = [];
     var vat_switch = false;
-    var selected_item_id = "";
+    var edit_item_id = 0;
+    var unique_item_id = 0;
+    var selected_product_id = 0;
     var selected_item_code = "";
     var item_table_data = [];
     var item_table_list;
@@ -364,7 +366,6 @@
         calculateVat();
     });
 
-    // $('#item_discount_details').on('input', function() {
     function initialize_inputs() {
         $('.item_discounts_details').on('input', function() {
             get_all_discount_value();
@@ -398,6 +399,7 @@
             success: function(response) {
                 $('#loader').hide();
                 var data = JSON.parse(response); 
+                console.log('get_products_clients_si');
                 console.log(data);
                 products = data.products.map(function(product) {
                     return {
@@ -422,10 +424,9 @@
 
                 sales_invoice = data.sales_invoice.map(function(si) {
                     return {
-                        id: si.id,
+                        si_id: si.id,
                         client_name: si.client_name,
                         client_term: si.client_term,
-                        client_date: si.client_date,
                         si_status: si.si_status,
                         si_date: si.updated_at
                     }
@@ -465,15 +466,15 @@
             $('#client_address_details').text(selectedItem.client_address);
             $('#client_company_details').text(selectedItem.client_business_name);
             $('#client_term_details').val(selectedItem.client_term).change();
-            // Remove setting the date
-            // $('#client_date_details').val(new Date().toISOString().split('T')[0]);
             $('#clients_details').attr('data-client-id', selectedItem.id); // Add this line
         }
     }
 
     function productShowDetails(id) {
         var selectedItem = products.find(product => product.id == id);
-        selected_item_id = selectedItem.id;
+        console.log('selectedItem');
+        console.log(selectedItem);
+        selected_product_id = selectedItem.id;
         selected_item_code = selectedItem.product_item;
         if (selectedItem) {
             $('#item_price_details').val(selectedItem.product_price);
@@ -528,13 +529,18 @@
     }
 
     function add_item_details() {
+        console.log('add_item_details>>>>>>>>..');
+
+        // var gen_uid = new Date().getTime();
+        var item_id = edit_item_id != 0 ? edit_item_id : 0;
+        var unique_id = unique_item_id != 0 ? unique_item_id : new Date().getTime();
         var add_item_price = $('#item_price_details').val();
         var add_item_qty = $('#item_qty_details').val();
         var add_item_checkbox = $('#item_switch_details').is(":checked");
         var add_item_vatable_sales = $('#item_vatsales_details').attr('data-vatsales');
         var add_item_vat = $('#item_vat_details').attr('data-vat');
 
-        if(selected_item_id === "" || selected_item_code === "") {
+        if(selected_product_id === 0 || selected_item_code === "") {
             alert("Product is empty.");
             return;
         }
@@ -554,12 +560,11 @@
 
         get_all_discount_value(); // Ensure discount_list is updated before adding the item
 
-        var unique_id = new Date().getTime(); // Generate a unique ID based on the current timestamp
-
         item_table_data.push(
             {
+                id: item_id,
                 unique_id: unique_id,
-                id: selected_item_id,
+                product_id: selected_product_id,
                 item_code: selected_item_code,
                 item_price: add_item_price,
                 item_qty: add_item_qty,
@@ -569,7 +574,7 @@
                 item_vat_check: add_item_checkbox
             }
         );
-        console.log(selected_item_id);
+        console.log('item_table_data>>>>>', item_table_data);
         item_list_table();
         compute_vatables();
         clear_item_fields();
@@ -588,16 +593,19 @@
         $('#item_total_details').text('').attr('data-total', '');
         $('#add_input_discount').empty();
         input_counter = 0;
+        edit_item_id = 0;
+        unique_item_id = 0;
         add_discount_input();
     }
 
     function item_list_table() {
+        console.log('item_table_data');
         console.log(item_table_data);
         item_table_list = $('#item_list_table').DataTable({
             destroy: true,
             data: item_table_data,
             columns: [
-                { data: 'id', visible: false },
+                { data: 'unique_id', visible: false },
                 { data: 'item_code'},
                 { data: 'item_price'},
                 { data: 'item_qty'},
@@ -654,7 +662,10 @@
     function populateSalesInvoiceDetails(data) {
         console.log('populateSalesInvoiceDetails');
         console.log(data);
-        $('#products_details').val(data.id).change();
+        edit_item_id = data.id;
+        unique_item_id = data.unique_id;
+        
+        $('#products_details').val(data.product_id).trigger('change');
         $('#item_price_details').val(data.item_price);
         $('#item_qty_details').val(data.item_qty);
         $('#item_switch_details').prop('checked', data.item_vat_check);
@@ -802,8 +813,7 @@
         $('#client_address_details').text('');
         $('#client_company_details').text('');
         $('#client_term_details').val('cod').change();
-        // Remove clearing the date field
-        // $('#client_date_details').val('');
+
     }
 
     function save_sales_invoice(type) {
@@ -819,14 +829,8 @@
         };
         
         var customerDetail = {
-            id: $('#clients_details').attr('data-client-id'), // Add this line
-            name: $('#clients_details').val(),
-            tin: $('#client_tin_details').text(),
-            address: $('#client_address_details').text(),
-            company: $('#client_company_details').text(),
+            id: $('#clients_details').attr('data-client-id'),
             terms: $('#client_term_details').val()
-            // Remove the date field
-            // date: $('#client_date_details').val()
         }
 
         var invoiceData = {
@@ -844,8 +848,6 @@
         if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
         if (!customerDetail.id) missingFields.push('Customer Name');
         if (!customerDetail.terms) missingFields.push('Customer Terms');
-        // Remove the date field validation
-        // if (!customerDetail.date) missingFields.push('Customer Date');
         if (item_table_data.length === 0) missingFields.push('Items');
 
         if (missingFields.length > 0) {
@@ -882,7 +884,7 @@
             data: sales_invoice,
             order: [0, 'desc'], // Change the order to use the first column (SI_ID)
             columns: [
-                { data: 'id'},
+                { data: 'si_id'},
                 { data: 'client_name'},
                 { 
                     data: function(data) {
@@ -944,14 +946,17 @@
         $('.edit_si_btn').off('click');
         $('.edit_si_btn').on('click', function() {
             var data = invoice_list_table.row($(this).parents('tr')).data();
+            console.log('initSalesInvoiceButton');
+            console.log(data);
+            console.log(data.si_id);
             showUniversalModal(function() {
                 $.ajax({
                     url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(data.id),
+                    data: JSON.stringify(data.si_id),
                     success: function(response) {
-                        console.log(response);
+                        console.log('response>>>>', JSON.parse(response));
                         var invoiceData = JSON.parse(response);
                         clear_item_fields(); // Clear the items part
                         populateInvoiceModule(invoiceData);
@@ -975,26 +980,24 @@
 
     function makeCustomerDetailsNonEditable() {
         $('#clients_details').prop('disabled', true);
-        // Remove making the date field non-editable
-        // $('#client_date_details').prop('disabled', true);
     }
 
     function makeCustomerDetailsEditable() {
         $('#clients_details').prop('disabled', false);
-        // Remove making the date field editable
-        // $('#client_date_details').prop('disabled', false);
+
     }
 
     function populateInvoiceModule(data) {
-        console.log(data);
+
+        console.log('data>>>>>>>>>', data);
         // Populate customer details
         $('#clients_details').val(data.client_id).change();
         $('#client_term_details').val(data.client_term_name).change();
-        // Remove setting the date
-        // $('#client_date_details').val(data.client_date);
 
         // Populate freight cost
         $('#item_freight_details').val(data.freight_cost);
+
+        $('#si_id').attr('data-si-id', data.id);
 
         // Clear and repopulate item table data
         item_table_data = [];
@@ -1005,6 +1008,7 @@
             item_table_data.push({
                 unique_id: item.si_unique_id,
                 id: item.si_item_id,
+                product_id: item.product_id,
                 item_code: item.si_item_code,
                 item_price: item.si_item_price,
                 item_qty: item.si_item_qty,
@@ -1062,10 +1066,13 @@
             // date: $('#client_date_details').val()
         }
 
+        var si_id = $('#si_id').attr('data-si-id');
+
         var invoiceData = {
             summary: summaryData,
             customer: customerDetail,
-            items: item_table_data
+            items: item_table_data,
+            si_id: si_id
         };
 
         // Validate data
@@ -1086,6 +1093,7 @@
             return;
         }
 
+        console.log('invoiceData');
         console.log(invoiceData);
 
         $.ajax({
@@ -1094,6 +1102,7 @@
             contentType: 'application/json',
             data: JSON.stringify(invoiceData),
             success: function(response) {
+                console.log('response>>>>', response);
                 alert('Draft updated successfully');
                 clearTableAndSummary();
                 get_products_clients_si();

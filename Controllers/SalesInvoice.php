@@ -149,38 +149,57 @@ class SalesInvoice extends BaseController
             $totalAmount,
             $si_status,
             $user_id,
-            $user_id,
-            $data['id'] // Add the sales invoice ID for updating
+            $data['si_id'] // Add the sales invoice ID for updating
         ];
 
-        return json_encode(['status' => 'success']);
+        
+        $updateResult = $this->coreModel->update_sales_invoice($params);
+        
+        if ($updateResult === 'success') {
+            foreach ($items as $item) { 
+                if($item['id'] === 0) {
+                    $params = [
+                        $data['si_id'],
+                        $item['item_code'],
+                        $item['item_price'],
+                        $item['item_qty'],
+                        $item['item_vat'],
+                        $item['item_vat_check'],
+                        $item['item_vatable_sales'],
+                        $item['unique_id']
+                    ];
+                    $lastItemResult = $this->coreModel->insert_sales_invoice_items($params);
+    
+                    if (isset($item['item_discount'])) {
+                        $si_item_id = $lastItemResult[0]->id; // Get the last inserted ID for the item
+                        $this->coreModel->insert_sales_invoice_items_discounts($item['item_discount'], $si_item_id);
+                    }
+                }
+                else {
+                    $params = [
+                        $item['item_code'],
+                        $item['item_price'],
+                        $item['item_qty'],
+                        $item['item_vat'],
+                        $item['item_vat_check'],
+                        $item['item_vatable_sales'],
+                        $item['id']
+                    ];
+                    $result = $this->coreModel->update_sales_invoice_items($params);
 
-        // $updateResult = $this->coreModel->update_sales_invoice($params);
+                    if (isset($item['item_discount'])) {
+                        $si_item_id = $item['id']; // Get the last inserted ID for the item
+                        $this->coreModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id);
+                    }
+                }
+                // return json_encode(['status' => $lastItemResult]);
 
-        // if ($updateResult === 'success') {
-        //     foreach ($items as $item) {
-        //         $params = [
-        //             $data['id'], // Use the sales invoice ID for updating items
-        //             $item['item_code'],
-        //             $item['item_price'],
-        //             $item['item_qty'],
-        //             $item['item_vat'],
-        //             $item['item_vat_check'],
-        //             $item['item_vatable_sales'],
-        //             $item['unique_id']
-        //         ];
-        //         $lastItemResult = $this->coreModel->update_sales_invoice_items($params);
+            }
 
-        //         if (isset($item['item_discount'])) {
-        //             $si_item_id = $lastItemResult[0]->id; // Get the last inserted ID for the item
-        //             $this->coreModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id);
-        //         }
-        //     }
-
-        //     return json_encode(['status' => 'success']);
-        // } else {
-        //     return json_encode(['status' => 'failed', 'message' => $updateResult]);
-        // }
+            return json_encode(['status' => 'success']);
+        } else {
+            return json_encode(['status' => 'failed', 'message' => $updateResult]);
+        }
     }
 
     function get_sales_invoice_by_id() {
@@ -191,6 +210,7 @@ class SalesInvoice extends BaseController
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
         }
+        
 
         $salesInvoice = [];
         $items = [];
@@ -201,10 +221,6 @@ class SalesInvoice extends BaseController
                 $salesInvoice = [
                     'id' => $row->id,
                     'client_id' => $row->client_id,
-                    'client_name' => $row->client_name,
-                    'client_tin' => $row->client_tin,
-                    'client_address' => $row->client_address,
-                    'client_business_name' => $row->client_business_name,
                     'client_term_name' => $row->client_term,
                     'si_status' => $row->si_status,
                     'freight_cost' => $row->freight_cost,
@@ -215,14 +231,15 @@ class SalesInvoice extends BaseController
             $itemId = $row->si_unique_id;
             if (!isset($items[$itemId])) {
                 $items[$itemId] = [
-                    'si_item_id' => $row->si_item_id,
+                    'si_item_id' => (int) $row->si_item_id,
+                    'product_id' => $row->product_id,
                     'si_item_code' => $row->si_item_code,
                     'si_item_price' => $row->si_item_price,
                     'si_item_qty' => $row->si_item_qty,
                     'si_item_vat' => $row->si_item_vat,
                     'si_item_vat_check' => $row->si_item_vat_check,
                     'si_item_vatable_sales' => $row->si_item_vatable_sales,
-                    'si_unique_id' => $row->si_unique_id,
+                    'si_unique_id' => (int) $row->si_unique_id,
                     'discounts' => []
                 ];
             }
