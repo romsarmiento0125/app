@@ -646,16 +646,18 @@
         $('.remove_summary_btn').off('click');
         $('.remove_summary_btn').on('click', function() {
             var data = item_table_list.row($(this).parents('tr')).data();
-            if(data.id === 0) {
-            }
-            else {
-                to_archive_items.push(
-                    {
-                        id: data.id
-                    }
-                );
-            }
-            removeItemFromTable(data.unique_id);
+            showUniversalModal(function() {
+                if(data.id === 0) {
+                }
+                else {
+                    to_archive_items.push(
+                        {
+                            id: data.id
+                        }
+                    );
+                }
+                removeItemFromTable(data.unique_id);
+            });
         });
     }
 
