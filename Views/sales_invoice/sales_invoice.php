@@ -1052,8 +1052,6 @@
             address: $('#client_address_details').text(),
             company: $('#client_company_details').text(),
             terms: $('#client_term_details').val()
-            // Remove the date field
-            // date: $('#client_date_details').val()
         }
 
         var si_id = $('#si_id').attr('data-si-id');

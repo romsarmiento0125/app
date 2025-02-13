@@ -205,16 +205,18 @@ class SalesInvoice extends BaseController
 
             }
 
-            foreach($archives as $archive) {
-                $params = [
-                    $user_id,
-                    1,
-                    $archive['id'],
-                ];
-                $archive = $this->coreModel->archive_sales_invoice_items($params);
+            if (!empty($archives)) {
+                foreach($archives as $archive) {
+                    $params = [
+                        $user_id,
+                        1,
+                        $archive['id'],
+                    ];
+                    $this->coreModel->archive_sales_invoice_items($params);
+                }
+               
             }
-
-            return json_encode(['status' => $archive]);
+            return json_encode(['status' => 'success']);
         } else {
             return json_encode(['status' => 'failed', 'message' => $updateResult]);
         }
