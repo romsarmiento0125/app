@@ -54,39 +54,37 @@
     
     <div class="p-4">
         <div class="row">
-            <div class="col-4">
-                <a href="#" class="nav-box">
+            <div class="col-4 mb-3">
+                <a href="/dashboard" class="nav-box">
                     <img src="<?= base_url('assets/carousel_photo/Breeder.jpg') ?>" alt="Module 1">
                     <div>Dashboard</div>
                 </a>
             </div>
-            <div class="col-4">
+            <div class="col-4 mb-3">
                 <a href="/sales_invoice" class="nav-box">
-                    <img src="<?= base_url('assets/carousel_photo/Finisher.jpg') ?>" alt="Module 2">
+                    <img src="<?= base_url('assets/home_photo/sales_invoice_module.png') ?>" alt="Module 2">
                     <div>Sales Invoice</div>
                 </a>
             </div>
-            <div class="col-4">
-                <a href="#" class="nav-box">
+            <div class="col-4 mb-3 d-none">
+                <a href="/delivery_receipt" class="nav-box">
                     <img src="<?= base_url('assets/carousel_photo/Grower.jpg') ?>" alt="Module 3">
                     <div>Delivery Receipt</div>
                 </a>
             </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-4">
+            <div class="col-4 mb-3">
                 <a href="/clients" class="nav-box">
                     <img src="<?= base_url('assets/home_photo/clients_module.png') ?>" alt="Module 4">
                     <div>Clients</div>
                 </a>
             </div>
-            <div class="col-4">
+            <div class="col-4 mb-3">
                 <a href="/products" class="nav-box">
                     <img src="<?= base_url('assets/home_photo/products_module.png') ?>" alt="Module 5">
                     <div>Products</div>
                 </a>
             </div>
-            <div class="col-4">
+            <div class="col-4 mb-3">
             </div>
         </div>
     </div>

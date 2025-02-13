@@ -41,7 +41,7 @@
                     <a class="nav-link <?= $current_page == '' ? 'active' : '' ?>" href="<?= base_url('/') ?>">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $current_page == 'dahsboard' ? 'active' : '' ?>" href="<?= base_url('/dahsboard') ?>">Dashboard</a>
+                    <a class="nav-link <?= $current_page == 'dahsboard' ? 'active' : '' ?>" href="<?= base_url('/dashboard') ?>">Dashboard</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $current_page == 'sales_invoice' ? 'active' : '' ?>" href="<?= base_url('/sales_invoice') ?>">Sales Invoice</a>
