@@ -183,7 +183,6 @@ class CoreModel extends Model
             if ($this->db->transStatus() === false) {
                 // Transaction failed, rollback
                 $this->db->transRollback();
-                log_message('error', 'Failed to update sales invoice: ' . json_encode($data));
                 return 'failed';
             } else {
                 // Transaction successful, commit
@@ -193,7 +192,6 @@ class CoreModel extends Model
         } catch (\Exception $e) {
             // Rollback transaction in case of exception
             $this->db->transRollback();
-            log_message('error', 'Exception while updating sales invoice: ' . $e->getMessage());
             return $e->getMessage();
         }
     }
@@ -220,7 +218,6 @@ class CoreModel extends Model
             if ($this->db->transStatus() === false) {
                 // Transaction failed, rollback
                 $this->db->transRollback();
-                log_message('error', 'Failed to update sales invoice item: ' . json_encode($params));
                 return 'failed';
             } else {
                 // Transaction successful, commit
@@ -229,7 +226,6 @@ class CoreModel extends Model
             }
         } catch (\Exception $e) {
             $this->db->transRollback();
-            log_message('error', 'Exception while updating sales invoice item: ' . $e->getMessage());
             return $e->getMessage();
         }
     }
@@ -304,7 +300,6 @@ class CoreModel extends Model
             if ($this->db->transStatus() === false) {
                 // Transaction failed, rollback
                 $this->db->transRollback();
-                log_message('error', 'Failed to update sales invoice item discounts: ' . json_encode($discounts));
                 return 'failed';
             } else {
                 // Transaction successful, commit
@@ -313,7 +308,6 @@ class CoreModel extends Model
             }
         } catch (\Exception $e) {
             $this->db->transRollback();
-            log_message('error', 'Exception while updating sales invoice item discounts: ' . $e->getMessage());
             return $e->getMessage();
         }
     }

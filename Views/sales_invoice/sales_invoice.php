@@ -399,8 +399,6 @@
             success: function(response) {
                 $('#loader').hide();
                 var data = JSON.parse(response); 
-                console.log('get_products_clients_si');
-                console.log(data);
                 products = data.products.map(function(product) {
                     return {
                         id: product.id,
@@ -472,8 +470,6 @@
 
     function productShowDetails(id) {
         var selectedItem = products.find(product => product.id == id);
-        console.log('selectedItem');
-        console.log(selectedItem);
         selected_product_id = selectedItem.id;
         selected_item_code = selectedItem.product_item;
         if (selectedItem) {
@@ -529,9 +525,6 @@
     }
 
     function add_item_details() {
-        console.log('add_item_details>>>>>>>>..');
-
-        // var gen_uid = new Date().getTime();
         var item_id = edit_item_id != 0 ? edit_item_id : 0;
         var unique_id = unique_item_id != 0 ? unique_item_id : new Date().getTime();
         var add_item_price = $('#item_price_details').val();
@@ -574,7 +567,6 @@
                 item_vat_check: add_item_checkbox
             }
         );
-        console.log('item_table_data>>>>>', item_table_data);
         item_list_table();
         compute_vatables();
         clear_item_fields();
@@ -599,8 +591,6 @@
     }
 
     function item_list_table() {
-        console.log('item_table_data');
-        console.log(item_table_data);
         item_table_list = $('#item_list_table').DataTable({
             destroy: true,
             data: item_table_data,
@@ -660,8 +650,6 @@
     }
 
     function populateSalesInvoiceDetails(data) {
-        console.log('populateSalesInvoiceDetails');
-        console.log(data);
         edit_item_id = data.id;
         unique_item_id = data.unique_id;
         
@@ -677,7 +665,6 @@
         $('#add_input_discount').empty();
         input_counter = 0;
         data.item_discount.forEach(function(discount, index) {
-            console.log("dicount");
             add_discount_input();
             $('#item_discount_value_' + (index + 1)).val(discount.discount);
             $('#item_discount_label_' + (index + 1)).val(discount.label);
@@ -789,7 +776,7 @@
                 '<p class="mx-2">x</p>' +
                 '<p class="fw-bold">' + qty + '</p>' +
                 '<p class="mx-2">=</p>' +
-                '<p class="fw-bold">' + (dis.discount * qty) + '</p>' +
+                '<p class="fw-bold">' + (formatPrice((dis.discount * qty))) + '</p>' +
                 '<p class="fw-bold ms-2">' + dis.label + '</p>' +
                 '</div>';
             $('#discount_summary').append(disc_sum);
@@ -877,8 +864,6 @@
     }
 
     function sales_invoice_table() {
-        console.log('sales_invoice');
-        console.log(sales_invoice);
         invoice_list_table = $('#invoice_list_table').DataTable({
             destroy: true,
             data: sales_invoice,
@@ -946,9 +931,6 @@
         $('.edit_si_btn').off('click');
         $('.edit_si_btn').on('click', function() {
             var data = invoice_list_table.row($(this).parents('tr')).data();
-            console.log('initSalesInvoiceButton');
-            console.log(data);
-            console.log(data.si_id);
             showUniversalModal(function() {
                 $.ajax({
                     url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
@@ -956,7 +938,6 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data.si_id),
                     success: function(response) {
-                        console.log('response>>>>', JSON.parse(response));
                         var invoiceData = JSON.parse(response);
                         clear_item_fields(); // Clear the items part
                         populateInvoiceModule(invoiceData);
@@ -988,8 +969,6 @@
     }
 
     function populateInvoiceModule(data) {
-
-        console.log('data>>>>>>>>>', data);
         // Populate customer details
         $('#clients_details').val(data.client_id).change();
         $('#client_term_details').val(data.client_term_name).change();
@@ -1002,9 +981,6 @@
         // Clear and repopulate item table data
         item_table_data = [];
         data.items.forEach(function(item) {
-            console.log(item);
-            console.log(item.si_item_id);
-            console.log(item.si_item_vat_check);
             item_table_data.push({
                 unique_id: item.si_unique_id,
                 id: item.si_item_id,
@@ -1084,8 +1060,6 @@
         if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
         if (!customerDetail.id) missingFields.push('Customer Name');
         if (!customerDetail.terms) missingFields.push('Customer Terms');
-        // Remove the date field validation
-        // if (!customerDetail.date) missingFields.push('Customer Date');
         if (item_table_data.length === 0) missingFields.push('Items');
 
         if (missingFields.length > 0) {
@@ -1093,16 +1067,12 @@
             return;
         }
 
-        console.log('invoiceData');
-        console.log(invoiceData);
-
         $.ajax({
             url: '<?= base_url('sales_invoice/update_draft') ?>',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(invoiceData),
             success: function(response) {
-                console.log('response>>>>', response);
                 alert('Draft updated successfully');
                 clearTableAndSummary();
                 get_products_clients_si();

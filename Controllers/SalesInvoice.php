@@ -192,7 +192,6 @@ class SalesInvoice extends BaseController
                         $this->coreModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id);
                     }
                 }
-                // return json_encode(['status' => $lastItemResult]);
 
             }
 
@@ -246,7 +245,7 @@ class SalesInvoice extends BaseController
 
             if ($row->discount_label) {
                 $items[$itemId]['discounts'][] = [
-                    'discount_label' => $row->discount_label,
+                    'label' => $row->discount_label,
                     'discount' => $row->discount
                 ];
             }
