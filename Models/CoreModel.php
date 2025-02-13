@@ -208,6 +208,7 @@ class CoreModel extends Model
                 si_item_vat = ?,
                 si_item_vat_check = ?,
                 si_item_vatable_sales = ?,
+                updater_id = ?,
                 updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?";
 
@@ -243,8 +244,10 @@ class CoreModel extends Model
                 si_item_vat,
                 si_item_vat_check,
                 si_item_vatable_sales,
-                si_unique_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                si_unique_id,
+                creator_id,
+                updater_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $this->db->query($query, $params);
 
@@ -267,21 +270,24 @@ class CoreModel extends Model
         }
     }
 
-    public function update_sales_invoice_items_discounts($discounts, $si_item_id)
+    public function update_sales_invoice_items_discounts($discounts, $si_item_id, $user_id)
     {
         try {
             $this->db->transStart(); // Start Transaction
 
             // First, delete existing discounts for the item
             $deleteQuery = "DELETE FROM sales_invoice_items_list_discount WHERE si_item_id = ?";
-            $this->db->query($deleteQuery, [$si_item_id]);
+            $this->db->query($deleteQuery, $si_item_id);
 
             // Then, insert the new discounts
             $insertQuery = "INSERT INTO sales_invoice_items_list_discount (
                 si_item_id,
                 discount_label,
-                discount
-            ) VALUES (?, ?, ?)";
+                discount,
+                creator_id,
+                updater_id,
+                archive
+            ) VALUES (?, ?, ?, ?, ?, 0)";
 
             foreach ($discounts as $discount) {
                 if (empty($discount['label']) || $discount['discount'] == 0) {
@@ -290,9 +296,11 @@ class CoreModel extends Model
                 $params = [
                     $si_item_id,
                     $discount['label'],
-                    $discount['discount']
+                    $discount['discount'],
+                    $user_id,
+                    $user_id
                 ];
-                $this->db->query($insertQuery, $params);
+                $ins = $this->db->query($insertQuery, $params);
             }
 
             $this->db->transComplete(); // Complete Transaction
@@ -301,18 +309,21 @@ class CoreModel extends Model
                 // Transaction failed, rollback
                 $this->db->transRollback();
                 return 'failed';
+                // return $params;
             } else {
                 // Transaction successful, commit
                 $this->db->transCommit();
                 return 'success';
+                // return $params;
             }
         } catch (\Exception $e) {
             $this->db->transRollback();
+            log_message('error', 'Exception while updating sales invoice: ' . $e->getMessage());
             return $e->getMessage();
         }
     }
 
-    public function insert_sales_invoice_items_discounts($discounts, $si_item_id)
+    public function insert_sales_invoice_items_discounts($discounts, $si_item_id, $user_id)
     {
         try {
             $this->db->transStart(); // Start Transaction
@@ -320,8 +331,11 @@ class CoreModel extends Model
             $query = "INSERT INTO sales_invoice_items_list_discount (
                 si_item_id,
                 discount_label,
-                discount
-            ) VALUES (?, ?, ?)";
+                discount,
+                creator_id,
+                updater_id,
+                archive
+            ) VALUES (?, ?, ?, ?, ?, 0)";
 
             foreach ($discounts as $discount) {
                 if (empty($discount['label']) || $discount['discount'] == 0) {
@@ -330,7 +344,9 @@ class CoreModel extends Model
                 $params = [
                     $si_item_id,
                     $discount['label'],
-                    $discount['discount']
+                    $discount['discount'],
+                    $user_id,
+                    $user_id
                 ];
                 $this->db->query($query, $params);
             }
@@ -491,10 +507,71 @@ class CoreModel extends Model
                     LEFT JOIN sales_invoice_items_list si_items ON si.id = si_items.si_id
                     LEFT JOIN sales_invoice_items_list_discount si_items_discount ON si_items.id = si_items_discount.si_item_id
                     INNER JOIN products p ON si_items.si_item_code =  p.product_item
-                    WHERE si.id = ?";
+                    WHERE si.id = ? AND si.archive = 0 AND si_items.archive = 0";
             return $this->db->query($query, [$id])->getResult();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
     }
+
+    public function archive_sales_invoice_items($params)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            $query = "UPDATE sales_invoice_items_list SET 
+                updater_id = ?,
+                archive = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?";
+
+            $this->db->query($query, $params);
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success'; // Return the last inserted ID and result
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
+
+    public function archive_sales_invoice_items_discount($params)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            $query = "UPDATE sales_invoice_items_list SET 
+                updater_id = ?,
+                archive = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?";
+
+            $this->db->query($query, $params);
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success'; // Return the last inserted ID and result
+            }
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            return $e->getMessage();
+        }
+    }
+    
 }

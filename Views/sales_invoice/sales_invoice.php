@@ -272,8 +272,9 @@
                                 <hr>
                                 <div class="d-flex justify-content-end">
                                     <button class="btn btn-secondary me-2" id="update_draft_btn" style="display: none;" onclick="update_sales_invoice('draft')">Update Draft</button>
+                                    <button class="btn btn-danger me-2" id="cancel_update_draft_btn" style="display: none;" onclick="cancel_update_sales_invoice()">Cancel</button>
                                     <button class="btn btn-secondary me-2" id="draft_btn" onclick="save_sales_invoice('draft')">Draft</button>
-                                    <button class="btn btn-success" onclick="">Print</button>
+                                    <button class="btn btn-success" id="print_btn" onclick="">Print</button>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +324,7 @@
     var input_counter = 0;
     var discount_list = [];
     var invoice_list_table = [];
-    var originalInvoiceData = {};
+    var to_archive_items = [];
 
     $(document).ready(function() {
         get_products_clients_si();
@@ -645,6 +646,15 @@
         $('.remove_summary_btn').off('click');
         $('.remove_summary_btn').on('click', function() {
             var data = item_table_list.row($(this).parents('tr')).data();
+            if(data.id === 0) {
+            }
+            else {
+                to_archive_items.push(
+                    {
+                        id: data.id
+                    }
+                );
+            }
             removeItemFromTable(data.unique_id);
         });
     }
@@ -785,6 +795,7 @@
 
     function clearTableAndSummary() {
         item_table_data = [];
+        to_archive_items = [];
         item_list_table();
         $('#item_freight_details').val('0');
         $('#summary_total_amount').text('').attr('data-total-amount', '');
@@ -942,8 +953,9 @@
                         clear_item_fields(); // Clear the items part
                         populateInvoiceModule(invoiceData);
                         $('#update_draft_btn').show(); // Show the update draft button
+                        $('#cancel_update_draft_btn').show(); 
                         $('#draft_btn').hide(); // Hide the draft button
-                        originalInvoiceData = JSON.parse(JSON.stringify(invoiceData)); // Store original data for comparison
+                        $('#print_btn').hide(); 
                         makeCustomerDetailsNonEditable(); // Make customer details non-editable
                     },
                     error: function(xhr) {
@@ -1048,7 +1060,8 @@
             summary: summaryData,
             customer: customerDetail,
             items: item_table_data,
-            si_id: si_id
+            si_id: si_id,
+            archive_items: to_archive_items
         };
 
         // Validate data
@@ -1077,7 +1090,9 @@
                 clearTableAndSummary();
                 get_products_clients_si();
                 $('#update_draft_btn').hide(); // Hide the update draft button
+                $('#cancel_update_draft_btn').hide(); 
                 $('#draft_btn').show(); // Show the draft button
+                $('#print_btn').show(); 
                 makeCustomerDetailsEditable(); // Make customer details editable again
             },
             error: function(xhr) {
@@ -1089,6 +1104,16 @@
                 }
             }
         });
+    }
+
+    function cancel_update_sales_invoice() {
+        clearTableAndSummary();
+        get_products_clients_si();
+        $('#update_draft_btn').hide(); // Hide the update draft button
+        $('#cancel_update_draft_btn').hide(); 
+        $('#draft_btn').show(); // Show the draft button
+        $('#print_btn').show(); 
+        makeCustomerDetailsEditable(); // Make customer details editable again
     }
 
 </script>
