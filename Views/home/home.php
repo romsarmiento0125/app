@@ -66,7 +66,7 @@
                     <div>Sales Invoice</div>
                 </a>
             </div>
-            <div class="col-4 mb-3 d-none">
+            <div class="col-4 mb-3">
                 <a href="/delivery_receipt" class="nav-box">
                     <img src="<?= base_url('assets/carousel_photo/Grower.jpg') ?>" alt="Module 3">
                     <div>Delivery Receipt</div>

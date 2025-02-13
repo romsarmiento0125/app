@@ -573,5 +573,42 @@ class CoreModel extends Model
             return $e->getMessage();
         }
     }
+
+    public function get_receipt_data($id)
+    {
+        try {
+            $query = "SELECT 
+                        c.client_name,
+                        c.client_tin,
+                        c.client_address,
+                        c.client_business_name,
+                        si.client_term AS client_term,
+                        si.updated_at AS si_date,
+                        si.vatable_sales,
+                        si.vat_exempt_sales,
+                        si.vat_amount,
+                        si.total_amount_due,
+                        si.freight_cost,
+                        si_items.si_item_qty,
+                        CONCAT(p.product_name,
+                                ' ( ',
+                                p.product_item,
+                                ' )') AS product_name,
+                        si_items.si_item_price AS unit_price,
+                        (si_items.si_item_price * si_items.si_item_qty) AS amount,
+                        si_items.id AS item_id,
+                        si_items_discount.discount_label,
+                        si_items_discount.discount
+                    FROM sales_invoice si
+                    LEFT JOIN sales_invoice_items_list si_items ON si.id = si_items.si_id
+                    LEFT JOIN sales_invoice_items_list_discount si_items_discount ON si_items.id = si_items_discount.si_item_id
+                    INNER JOIN products p ON si_items.si_item_code =  p.product_item
+                    INNER JOIN clients c ON si.client_id = c.id
+                    WHERE si.id = ? AND si.archive = 0 AND si_items.archive = 0";
+            return $this->db->query($query, [$id])->getResult();
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+    }
     
 }

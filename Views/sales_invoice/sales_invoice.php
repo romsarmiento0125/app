@@ -274,7 +274,7 @@
                                     <button class="btn btn-secondary me-2" id="update_draft_btn" style="display: none;" onclick="update_sales_invoice('draft')">Update Draft</button>
                                     <button class="btn btn-danger me-2" id="cancel_update_draft_btn" style="display: none;" onclick="cancel_update_sales_invoice()">Cancel</button>
                                     <button class="btn btn-secondary me-2" id="draft_btn" onclick="save_sales_invoice('draft')">Draft</button>
-                                    <button class="btn btn-success" id="print_btn" onclick="">Print</button>
+                                    <button class="btn btn-success" id="print_btn" onclick="save_sales_invoice('printed')">Print</button>
                                 </div>
                             </div>
                         </div>
@@ -646,7 +646,7 @@
         $('.remove_summary_btn').off('click');
         $('.remove_summary_btn').on('click', function() {
             var data = item_table_list.row($(this).parents('tr')).data();
-            showUniversalModal(function() {
+            showUniversalModal("Delete Item","Are you sure you want to delete this item?",function() {
                 if(data.id === 0) {
                 }
                 else {
@@ -817,62 +817,72 @@
     }
 
     function save_sales_invoice(type) {
-        var summaryData = {
-            totalAmount: $('#summary_total_amount').attr('data-total-amount'),
-            vatableSales: $('#summary_vatable_sales').attr('data-vatable-sales'),
-            vatAmount: $('#summary_vat_amount').attr('data-vat-amount'),
-            totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
-            vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
-            zeroRated: '0',
-            freightCost: $('#item_freight_details').val(),
-            si_status: type
-        };
-        
-        var customerDetail = {
-            id: $('#clients_details').attr('data-client-id'),
-            terms: $('#client_term_details').val()
-        }
-
-        var invoiceData = {
-            summary: summaryData,
-            customer: customerDetail,
-            items: item_table_data
-        };
-
-        // Validate data
-        var missingFields = [];
-        if (!summaryData.totalAmount) missingFields.push('Total Amount');
-        if (!summaryData.vatableSales) missingFields.push('VATable Sales');
-        if (!summaryData.vatAmount) missingFields.push('VAT Amount');
-        if (!summaryData.totalAmountDue) missingFields.push('Total Amount Due');
-        if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
-        if (!customerDetail.id) missingFields.push('Customer Name');
-        if (!customerDetail.terms) missingFields.push('Customer Terms');
-        if (item_table_data.length === 0) missingFields.push('Items');
-
-        if (missingFields.length > 0) {
-            alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
-            return;
-        }
-
-        $.ajax({
-            url: '<?= base_url('sales_invoice/save_draft') ?>',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(invoiceData),
-            success: function(response) {
-                alert('Draft saved successfully');
-                clearTableAndSummary();
-                get_products_clients_si();
-            },
-            error: function(xhr) {
-                if (xhr.status === 400) {
-                    var response = JSON.parse(xhr.responseText);
-                    alert(response.error);
-                } else {
-                    alert('Failed to save draft');
-                }
+        let prompt = type === "printed" ? "print" : "draft";
+        showUniversalModal("Confirm Action","Are you sure you want to " + prompt + " this item?",function() {
+            var summaryData = {
+                totalAmount: $('#summary_total_amount').attr('data-total-amount'),
+                vatableSales: $('#summary_vatable_sales').attr('data-vatable-sales'),
+                vatAmount: $('#summary_vat_amount').attr('data-vat-amount'),
+                totalAmountDue: $('#summary_total_amount_due').attr('data-total-amount-due'),
+                vatExemptSales: $('#summary_vat_exempt_sales').attr('data-vat-exempt-sales'),
+                zeroRated: '0',
+                freightCost: $('#item_freight_details').val(),
+                si_status: type
+            };
+            
+            var customerDetail = {
+                id: $('#clients_details').attr('data-client-id'),
+                terms: $('#client_term_details').val()
             }
+
+            var invoiceData = {
+                summary: summaryData,
+                customer: customerDetail,
+                items: item_table_data
+            };
+
+            // Validate data
+            var missingFields = [];
+            if (!summaryData.totalAmount) missingFields.push('Total Amount');
+            if (!summaryData.vatableSales) missingFields.push('VATable Sales');
+            if (!summaryData.vatAmount) missingFields.push('VAT Amount');
+            if (!summaryData.totalAmountDue) missingFields.push('Total Amount Due');
+            if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
+            if (!customerDetail.id) missingFields.push('Customer Name');
+            if (!customerDetail.terms) missingFields.push('Customer Terms');
+            if (item_table_data.length === 0) missingFields.push('Items');
+
+            if (missingFields.length > 0) {
+                alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
+                return;
+            }
+
+            $.ajax({
+                url: '<?= base_url('sales_invoice/save_draft') ?>',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(invoiceData),
+                success: function(response) {
+                    var data = JSON.parse(response);
+                    console.log(data);
+                    if(type === "draft") {
+                        alert('Draft saved successfully');
+                    }
+                    else {
+                        print_si(data.invoice_id)
+                    }
+                    clearTableAndSummary();
+                    get_products_clients_si();
+                },
+                error: function(xhr) {
+                    if (xhr.status === 400) {
+                        var response = JSON.parse(xhr.responseText);
+                        alert(response.error);
+                    } else {
+                        alert('Failed to save draft');
+                    }
+                }
+            });
         });
     }
 
@@ -944,7 +954,7 @@
         $('.edit_si_btn').off('click');
         $('.edit_si_btn').on('click', function() {
             var data = invoice_list_table.row($(this).parents('tr')).data();
-            showUniversalModal(function() {
+            showUniversalModal("Edit Confirmation", "Are you sure you want to edit this draft?",function() {
                 $.ajax({
                     url: '<?= base_url('sales_invoice/get_sales_invoice_by_id') ?>',
                     type: 'POST',
@@ -969,6 +979,14 @@
                         }
                     }
                 });
+            });
+        });
+
+        $('.print_si_btn').off('click');
+        $('.print_si_btn').on('click', function() {
+            var data = invoice_list_table.row($(this).parents('tr')).data();
+            showUniversalModal("Print Confirmation", "Are you sure you want to print this sales invoice?",function() {
+                print_si(data.si_id);
             });
         });
     }
@@ -1114,6 +1132,10 @@
         $('#draft_btn').show(); // Show the draft button
         $('#print_btn').show(); 
         makeCustomerDetailsEditable(); // Make customer details editable again
+    }
+
+    function print_si(id) {
+        window.open("/sales_invoice_view/"+id, "_blank");
     }
 
 </script>

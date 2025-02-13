@@ -58,7 +58,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to continue this action?
+                    <p class="modal-title" id="universalModalBody">Confirmation</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -78,7 +78,9 @@
             $('.select2').select2();
 
             // Universal Modal Handler
-            window.showUniversalModal = function(callback) {
+            window.showUniversalModal = function(title, message, callback) {
+                $('#universalModalLabel').text(title); // Set the modal title
+                $('#universalModalBody').text(message); // Set the modal body content (can be HTML)
                 $('#universalModal').modal('show');
                 $('#confirmAction').off('click').on('click', function() {
                     callback();
