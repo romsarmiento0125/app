@@ -89,7 +89,7 @@
             };
 
             $('#logout_button').click(function() {
-                showUniversalModal(function() {
+                showUniversalModal("Logout Confirmation", "Are you sure you want to logout?",function() {
                     $.ajax({
                         url: '<?= base_url('login/logout') ?>',
                         type: 'POST',

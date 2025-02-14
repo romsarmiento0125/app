@@ -57,6 +57,9 @@ class Home extends BaseController
             if (!isset($items[$itemId])) {
                 $items[$itemId] = [
                     'si_item_qty' => $row->si_item_qty,
+                    'product_name' => $row->product_name,
+                    'unit_price' => $row->unit_price,
+                    'amount' => $row->amount,
                     'discounts' => []
                 ];
             }
