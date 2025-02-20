@@ -1,189 +1,232 @@
 <?= $this->extend('layout') ?>
 
 <?= $this->section('content') ?>
-<div class="">
-    <div class="row">
-        <div class="col-8">
-            <p id="sir_client_name"></p>
-        </div>
-        <div class="col-4">
-            <p id="sir_date"></p>
-        </div>
-        <div class="col-8">
-            <p id="sir_tin"></p>
-        </div>
-        <div class="col-4">
-            <p id="sir_term"></p>
-        </div>
-        <div class="col-12">
-            <p id="sir_address"></p>
-        </div>
-        <div class="col-8">
-            <p id="sir_business_name"></p>
-        </div>
-        <div class="col-4">
 
-        </div>
-    </div>
-    <div class="" id="item_lists">
-        <!-- <div class="row">
-            <div class="col-1">
-                <p>30</p>
-            </div>
-            <div class="col-2">
-                <p>BAGS</p>
-            </div>
-            <div class="col-5">
-                <p>1 BLEND HOG BREEDER MASH</p>
-            </div>
-            <div class="col-2">
-                <p>1,180.00</p>
-            </div>
-            <div class="col-2">
-                <p>35,400.00</p>
-            </div>
-        </div> -->
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-5 d-flex d-flex justify-content-end">
-                <p>Freight:&nbsp;</P>
-                <p id="freight_cost"></p>
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-2">
-            </div>
-        </div>
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-5 d-flex justify-content-end">
-                <p>DISCOUNT</p>
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-2">
-                <p id="total_amount"></p>
-            </div>
-        </div>
-    </div>
-    <div class="" id="item_discounts">
-        <!-- <div class="row">
-            <div class="col-1">
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-5 d-flex justify-content-end">
-                <p>40 x 150</p>
-            </div>
-            <div class="col-2">
-            </div>
-            <div class="col-2">
-                <p>6,000.00 hbm</p>
-            </div>
-        </div> -->
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
+<style>
+    .receipt_margin {
+        margin-top: 155px;
+    }
 
-            </div>
-            <div class="col-2">
+    #sir_client_name {
+        font-size: 16px;
+        margin-left: 130px;
+        margin-bottom: 0px;
+    }
 
-            </div>
-            <div class="col-5">
+    #sir_date {
+        font-size: 16px;
+        margin-left: 60px;
+    }
 
-            </div>
-            <div class="col-2">
+    #sir_tin {
+        font-size: 16px;
+        margin-left: 70px;
+    }
 
-            </div>
-            <div class="col-2">
-                <p id="vat_sales"></p>
-            </div>
-        </div>
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
+    #sir_term {
+        font-size: 16px;
+        margin-left: 60px;
+    }
 
-            </div>
-            <div class="col-2">
+    #sir_address {
+        font-size: 16px;
+        margin-left: 130px;
+    }
 
-            </div>
-            <div class="col-5">
+    #sir_business_name {
+        font-size: 16px;
+        margin-left: 160px;
+    }
+    
+</style>
 
+<div class="row">
+    <div class="col-10">
+        <div class="receipt_margin">
+            <div class="row">
+                <div class="col-8">
+                    <p id="sir_client_name"></p>
+                </div>
+                <div class="col-4">
+                    <p id="sir_date"></p>
+                </div>
+                <div class="col-8">
+                    <p id="sir_tin"></p>
+                </div>
+                <div class="col-4">
+                    <p id="sir_term"></p>
+                </div>
+                <div class="col-12">
+                    <p id="sir_address"></p>
+                </div>
+                <div class="col-8">
+                    <p id="sir_business_name"></p>
+                </div>
+                <div class="col-4">
+        
+                </div>
             </div>
-            <div class="col-2">
-
+            <div class="" id="item_lists">
+                <!-- <div class="row">
+                    <div class="col-1">
+                        <p>30</p>
+                    </div>
+                    <div class="col-2">
+                        <p>BAGS</p>
+                    </div>
+                    <div class="col-5">
+                        <p>1 BLEND HOG BREEDER MASH</p>
+                    </div>
+                    <div class="col-2">
+                        <p>1,180.00</p>
+                    </div>
+                    <div class="col-2">
+                        <p>35,400.00</p>
+                    </div>
+                </div> -->
             </div>
-            <div class="col-2">
-                <p id="vat_exempt"></p>
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-5 d-flex d-flex justify-content-end">
+                        <p>Freight:&nbsp;</P>
+                        <p id="freight_cost"></p>
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-2">
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
-
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-5 d-flex justify-content-end">
+                        <p>DISCOUNT</p>
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-2">
+                        <p id="total_amount"></p>
+                    </div>
+                </div>
             </div>
-            <div class="col-2">
-
+            <div class="" id="item_discounts">
+                <!-- <div class="row">
+                    <div class="col-1">
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-5 d-flex justify-content-end">
+                        <p>40 x 150</p>
+                    </div>
+                    <div class="col-2">
+                    </div>
+                    <div class="col-2">
+                        <p>6,000.00 hbm</p>
+                    </div>
+                </div> -->
             </div>
-            <div class="col-5">
-
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-5">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-2">
+                        <p id="vat_sales"></p>
+                    </div>
+                </div>
             </div>
-            <div class="col-2">
-
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-5">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-2">
+                        <p id="vat_exempt"></p>
+                    </div>
+                </div>
             </div>
-            <div class="col-2">
-                <p>0</p>
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-5">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-2">
+                        <p>0</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
-
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-5">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-2">
+                        <p id="vat_amount"></p>
+                    </div>
+                </div>
             </div>
-            <div class="col-2">
-
-            </div>
-            <div class="col-5">
-
-            </div>
-            <div class="col-2">
-
-            </div>
-            <div class="col-2">
-                <p id="vat_amount"></p>
-            </div>
-        </div>
-    </div>
-    <div class="">
-        <div class="row">
-            <div class="col-1">
-
-            </div>
-            <div class="col-2">
-
-            </div>
-            <div class="col-5">
-
-            </div>
-            <div class="col-2">
-
-            </div>
-            <div class="col-2">
-                <p id="total_amount_due"></p>
+            <div class="">
+                <div class="row">
+                    <div class="col-1">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-5">
+        
+                    </div>
+                    <div class="col-2">
+        
+                    </div>
+                    <div class="col-2">
+                        <p id="total_amount_due"></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

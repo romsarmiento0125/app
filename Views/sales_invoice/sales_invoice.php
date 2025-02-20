@@ -108,9 +108,8 @@
                                             </div>
                                             <div class="col-6 content_center">
                                                 <div class="d-flex justify-content-end align-items-center">
-                                                    <!-- Remove the date field -->
-                                                    <!-- <p>Date:&nbsp;</p>
-                                                    <input type="date" class="form-control" id="client_date_details" disabled> -->
+                                                    <p>Date:&nbsp;</p>
+                                                    <input type="date" class="form-control" id="client_date_details">
                                                 </div>
                                             </div>
                                         </div>
@@ -331,6 +330,7 @@
         add_discount_input();
         initialize_inputs();
         $('#item_remove_discount').hide();
+        $('#client_date_details').val(new Date().toISOString().split('T')[0]);
     });
 
     $('#clients_details').change(function() {
@@ -832,7 +832,12 @@
             
             var customerDetail = {
                 id: $('#clients_details').attr('data-client-id'),
-                terms: $('#client_term_details').val()
+                name: $('#clients_details').val(),
+                tin: $('#client_tin_details').text(),
+                terms: $('#client_term_details').val(),
+                address: $('#client_address_details').text(),
+                busines: $('#client_company_details').text(),
+                date: $('#client_date_details').val()
             }
 
             var invoiceData = {
@@ -856,33 +861,34 @@
                 alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
                 return;
             }
+            console.log(invoiceData);
 
-            $.ajax({
-                url: '<?= base_url('sales_invoice/save_draft') ?>',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(invoiceData),
-                success: function(response) {
-                    var data = JSON.parse(response);
-                    console.log(data);
-                    if(type === "draft") {
-                        alert('Draft saved successfully');
-                    }
-                    else {
-                        print_si(data.invoice_id)
-                    }
-                    clearTableAndSummary();
-                    get_products_clients_si();
-                },
-                error: function(xhr) {
-                    if (xhr.status === 400) {
-                        var response = JSON.parse(xhr.responseText);
-                        alert(response.error);
-                    } else {
-                        alert('Failed to save draft');
-                    }
-                }
-            });
+            // $.ajax({
+            //     url: '<?= base_url('sales_invoice/save_draft') ?>',
+            //     type: 'POST',
+            //     contentType: 'application/json',
+            //     data: JSON.stringify(invoiceData),
+            //     success: function(response) {
+            //         var data = JSON.parse(response);
+            //         console.log(data);
+            //         if(type === "draft") {
+            //             alert('Draft saved successfully');
+            //         }
+            //         else {
+            //             print_si(data.invoice_id)
+            //         }
+            //         clearTableAndSummary();
+            //         get_products_clients_si();
+            //     },
+            //     error: function(xhr) {
+            //         if (xhr.status === 400) {
+            //             var response = JSON.parse(xhr.responseText);
+            //             alert(response.error);
+            //         } else {
+            //             alert('Failed to save draft');
+            //         }
+            //     }
+            // });
         });
     }
 

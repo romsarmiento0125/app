@@ -422,12 +422,13 @@ class CoreModel extends Model
             $query = "INSERT INTO products (
                 product_name,
                 product_item,
+                product_unit,
                 product_weight,
                 product_price,
                 creator_id,
                 updater_id,
                 archive
-            ) VALUES (?, ?, ?, ?, ?, ?, 0)";
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
 
             $this->db->query($query, $params);
 
@@ -457,6 +458,7 @@ class CoreModel extends Model
             $query = "UPDATE products SET 
                 product_name = ?,
                 product_item = ?,
+                product_unit = ?,
                 product_weight = ?,
                 product_price = ?,
                 updater_id = ?,

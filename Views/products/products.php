@@ -67,6 +67,7 @@
                                     <th class="d-none">ID</th>
                                     <th>Name</th>
                                     <th>Item&nbsp;Code</th>
+                                    <th>Units</th>
                                     <th>Weight&nbsp;(kg)</th>
                                     <th>Price</th>
                                     <th class='text-center'>Action</th>
@@ -104,13 +105,19 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-6 px-3">
+                <div class="col-4 px-3">
+                    <div class="d-flex align-items-center">
+                        <p>Units:&nbsp;</p>
+                        <input type="text" class="form-control" id="product_unit">
+                    </div>
+                </div>
+                <div class="col-4 px-3">
                     <div class="d-flex align-items-center">
                         <p>Weight&nbsp;(kg):&nbsp;</p>
                         <input type="number" class="form-control" id="product_weight">
                     </div>
                 </div>
-                <div class="col-6 px-3">
+                <div class="col-4 px-3">
                     <div class="d-flex align-items-center">
                         <p>Price:&nbsp;</p>
                         <input type="number" class="form-control" id="product_price">
@@ -150,13 +157,19 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-6 px-3">
+                <div class="col-4 px-3">
+                    <div class="d-flex align-items-center">
+                        <p>Units:&nbsp;</p>
+                        <input type="text" class="form-control" id="edit_product_unit">
+                    </div>
+                </div>
+                <div class="col-4 px-3">
                     <div class="d-flex align-items-center">
                         <p>Weight&nbsp;(kg):&nbsp;</p>
                         <input type="number" class="form-control" id="edit_product_weight">
                     </div>
                 </div>
-                <div class="col-6 px-3">
+                <div class="col-4 px-3">
                     <div class="d-flex align-items-center">
                         <p>Price:&nbsp;</p>
                         <input type="number" class="form-control" id="edit_product_price">
@@ -218,6 +231,7 @@
                 { data: 'id', visible: false },
                 { data: 'product_name' },
                 { data: 'product_item' },
+                { data: 'product_unit' },
                 { data: 'product_weight' },
                 { 
                     data: function(data) {
@@ -246,6 +260,7 @@
             var data = product_table_data.row($(this).parents('tr')).data();
             $('#edit_product_name').val(data.product_name);
             $('#edit_product_name').attr('data-id', data.id);
+            $('#edit_product_unit').val(data.product_unit);
             $('#edit_product_item').val(data.product_item);
             $('#edit_product_weight').val(data.product_weight);
             $('#edit_product_price').val(data.product_price);
@@ -254,22 +269,26 @@
     }
 
     $('#save_product').click(function() {
-        var product_name = $('#product_name').val();
-        var product_item = $('#product_item').val();
-        var product_weight = $('#product_weight').val();
-        var product_price = parseFloat($('#product_price').val()).toFixed(2);
+        var product_data = {
+            product_name: $('#product_name').val(),
+            product_item: $('#product_item').val(),
+            product_unit: $('#product_unit').val(),
+            product_weight: $('#product_weight').val(),
+            product_price: parseFloat($('#product_price').val()).toFixed(2)
+        }
+        console.log(product_data);
 
-        if (product_name === '' || product_item === '' || product_weight === '' || product_price === '') {
+        if (product_data.product_name === '' || product_data.product_item === '' || product_data.product_unit === '' || product_data.product_weight === '' || product_data.product_price === '') {
             alert('All fields are required');
             return;
         }
 
-        if (isProductNameExists(product_name)) {
+        if (isProductNameExists(product_data.product_name)) {
             alert('Product name already exists');
             return;
         }
 
-        if (isProductItemExists(product_item)) {
+        if (isProductItemExists(product_data.product_item)) {
             alert('Product item code already exists');
             return;
         }
@@ -278,12 +297,7 @@
         $.ajax({
             url: '<?= base_url('products/save_product') ?>',
             type: 'POST',
-            data: {
-                product_name: product_name,
-                product_item: product_item,
-                product_weight: product_weight,
-                product_price: product_price
-            },
+            data: JSON.stringify(product_data),
             success: function(response) {
                 var data = JSON.parse(response);
                 if (data.status === 'success') {
@@ -305,13 +319,16 @@
     });
 
     $('#save_edit_product').click(function() {
-        var product_name = $('#edit_product_name').val();
-        var product_name_attr = $('#edit_product_name').attr('data-id');
-        var product_item = $('#edit_product_item').val();
-        var product_weight = $('#edit_product_weight').val();
-        var product_price = parseFloat($('#edit_product_price').val()).toFixed(2);
+        var product_data = {
+            product_name: $('#edit_product_name').val(),
+            product_name_attr: $('#edit_product_name').attr('data-id'),
+            product_unit: $('#edit_product_unit').val(),
+            product_item: $('#edit_product_item').val(),
+            product_weight: $('#edit_product_weight').val(),
+            product_price: parseFloat($('#edit_product_price').val()).toFixed(2)
+        }
 
-        if (product_name === '' || product_item === '' || product_weight === '' || product_price === '') {
+        if (product_name === '' || product_unit === '' || product_item === '' || product_weight === '' || product_price === '') {
             alert('All fields are required');
             return;
         }
@@ -320,13 +337,7 @@
         $.ajax({
             url: '<?= base_url('products/edit_product') ?>',
             type: 'POST',
-            data: {
-                product_name: product_name,
-                product_name_attr: product_name_attr,
-                product_item: product_item,
-                product_weight: product_weight,
-                product_price: product_price
-            },
+            data: JSON.stringify(product_data),
             success: function(response) {
                 var data = JSON.parse(response);
                 if (data.status === 'success') {

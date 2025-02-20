@@ -4,38 +4,34 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Products extends Migration
+class DeliveryReceiptItemList extends Migration
 {
     public function up()
     {
         $fields = [
             'id' => [
                 'type' => 'INT',
-                'constraint' =>11,
+                'constraint' => 11,
                 'auto_increment' => true
             ],
-            'product_name' => [
+            'dr_id' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'null' => false,
+            ],
+            'dr_item_code' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
                 'constraint' => 255,
-                'null' => false,
             ],
-            'product_item' => [
+            'dr_item_price' => [
+                'type' => 'DOUBLE',
+            ],
+            'dr_item_qty' => [
+                'type' => 'DOUBLE',
+            ],
+            'dr_unique_id' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
-                'constraint' => 50,
-                'null' => false,
-            ],
-            'product_unit' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-            ],
-            'product_weight' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-            ],
-            'product_price' => [
-                'type' => 'DOUBLE'
+                'constraint' => 255,
             ],
             'creator_id' => [
                 'type' => 'VARCHAR',
@@ -53,11 +49,11 @@ class Products extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        $this->forge->createTable('products');
+        $this->forge->createTable('delivery_receipt_items_list');
     }
 
     public function down()
     {
-        $this->forge->dropTable('products');
+        $this->forge->dropTable('delivery_receipt_items_list');
     }
 }

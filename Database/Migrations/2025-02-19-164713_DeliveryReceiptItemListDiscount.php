@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Products extends Migration
+class DeliveryReceiptItemListDiscount extends Migration
 {
     public function up()
     {
@@ -14,28 +14,17 @@ class Products extends Migration
                 'constraint' =>11,
                 'auto_increment' => true
             ],
-            'product_name' => [
+            'dr_item_id' => [
+                'type' => 'INT',
+                'constraint' => 11,
+                'null' => false,
+            ],
+            'discount_label' => [
                 'type' => 'VARCHAR',
-                'unique' => true,
                 'constraint' => 255,
-                'null' => false,
             ],
-            'product_item' => [
-                'type' => 'VARCHAR',
-                'unique' => true,
-                'constraint' => 50,
-                'null' => false,
-            ],
-            'product_unit' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-            ],
-            'product_weight' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-            ],
-            'product_price' => [
-                'type' => 'DOUBLE'
+            'discount' => [
+                'type' => 'DOUBLE',
             ],
             'creator_id' => [
                 'type' => 'VARCHAR',
@@ -53,11 +42,11 @@ class Products extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        $this->forge->createTable('products');
+        $this->forge->createTable('delivery_receipt_items_list_discount');
     }
 
     public function down()
     {
-        $this->forge->dropTable('products');
+        $this->forge->dropTable('delivery_receipt_items_list_discount');
     }
 }

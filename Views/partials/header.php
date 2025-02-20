@@ -34,6 +34,7 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
+    <input type="hidden" id="base_url" value="<?= base_url() ?>">
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
         <div class="box">
             <ul class="navbar-nav">

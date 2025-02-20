@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class SalesInvoice extends Migration
+class DeliveryReceipt extends Migration
 {
     public function up()
     {
@@ -39,19 +39,7 @@ class SalesInvoice extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 255,
             ],
-            'vatable_sales' => [
-                'type' => 'DOUBLE'
-            ],
-            'vat_exempt_sales' => [
-                'type' => 'DOUBLE'
-            ],
-            'zero_rated' => [
-                'type' => 'DOUBLE'
-            ],
-            'vat_amount' => [
-                'type' => 'DOUBLE'
-            ],
-            'total_amount_due' => [
+            'sub_total' => [
                 'type' => 'DOUBLE'
             ],
             'freight_cost' => [
@@ -60,7 +48,7 @@ class SalesInvoice extends Migration
             'total_amount' => [
                 'type' => 'DOUBLE'
             ],
-            'si_status' => [
+            'dr_status' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255,
             ],
@@ -75,7 +63,7 @@ class SalesInvoice extends Migration
             'archive' => [
                 'type' => 'BOOLEAN',
             ],
-            'si_date' => [
+            'dr_date' => [
                 'type' => 'DATE',
                 'null' => false,
             ],
@@ -84,11 +72,11 @@ class SalesInvoice extends Migration
         ];
         $this->forge->addField($fields);
         $this->forge->addKey('id', true);
-        $this->forge->createTable('sales_invoice');
+        $this->forge->createTable('delivery_receipt');
     }
 
     public function down()
     {
-        $this->forge->dropTable('sales_invoice');
+        $this->forge->dropTable('delivery_receipt');
     }
 }

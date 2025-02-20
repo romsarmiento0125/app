@@ -32,11 +32,14 @@ class Products extends BaseController
     {
         $session = session();
         $user_id = $session->get('user_id');
-        
-        $product_name = $this->request->getPost('product_name');
-        $product_item = $this->request->getPost('product_item');
-        $product_weight = $this->request->getPost('product_weight');
-        $product_price = $this->request->getPost('product_price');
+
+        $data = $this->request->getJSON(true);
+
+        $product_name = $data['product_name'];
+        $product_item = $data['product_item'];
+        $product_unit = $data['product_unit'];
+        $product_weight = $data['product_weight'];
+        $product_price = $data['product_price'];
 
         $result = $this->coreModel->check_product_exists($product_name, $product_item);
         if (is_string($result)) {
@@ -49,6 +52,7 @@ class Products extends BaseController
         $params = [
             $product_name,
             $product_item,
+            $product_unit,
             $product_weight,
             $product_price,
             $user_id,
@@ -66,12 +70,15 @@ class Products extends BaseController
     {
         $session = session();
         $user_id = $session->get('user_id');
+
+        $data = $this->request->getJSON(true);
         
-        $product_name = $this->request->getPost('product_name');
-        $product_name_attr = $this->request->getPost('product_name_attr');
-        $product_item = $this->request->getPost('product_item');
-        $product_weight = $this->request->getPost('product_weight');
-        $product_price = $this->request->getPost('product_price');
+        $product_name = $data['product_name'];
+        $product_name_attr = $data['product_name_attr'];
+        $product_unit = $data['product_unit'];
+        $product_item = $data['product_item'];
+        $product_weight = $data['product_weight'];
+        $product_price = $data['product_price'];
 
         // Check if product name or item already exists
         $result = $this->coreModel->check_product_exists($product_name, $product_item);
@@ -85,6 +92,7 @@ class Products extends BaseController
         $params = [
             $product_name,
             $product_item,
+            $product_unit,
             $product_weight,
             $product_price,
             $user_id,
