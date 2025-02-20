@@ -57,14 +57,23 @@ class SalesInvoice extends BaseController
         // Extract customer data
         $customerDetail = $data['customer'];
         $customerId = $customerDetail['id'];
+        $customerName = $customerDetail['name'];
+        $customerTin = $customerDetail['tin'];
         $customerTerms = $customerDetail['terms'];
+        $customeraddress = $customerDetail['address'];
+        $customerbusiness = $customerDetail['business'];
+        $customerdate = $customerDetail['date'];
 
         // Extract items data
         $items = $data['items'];
 
         $params = [
             $customerId,
+            $customerName,
+            $customerTin,
             $customerTerms,
+            $customeraddress,
+            $customerbusiness, 
             $vatableSales,
             $vatExemptSales,
             $zeroRated,
@@ -74,11 +83,13 @@ class SalesInvoice extends BaseController
             $totalAmount,
             $si_status,
             $user_id,
-            $user_id
+            $user_id,
+            $customerdate
         ];
 
         $insertResult = $this->coreModel->insert_sales_invoice($params);
 
+        // return json_encode(['invoice' => $insertResult]);
         if (is_array($insertResult) && !empty($insertResult)) {
             $insertId = $insertResult[0]->id; // Access the ID from the result
 
@@ -134,8 +145,8 @@ class SalesInvoice extends BaseController
 
         // Extract customer data
         $customerDetail = $data['customer'];
-        $customerId = $customerDetail['id'];
         $customerTerms = $customerDetail['terms'];
+        $customerDate = $customerDetail['date'];
 
         // Extract items data
         $items = $data['items'];
@@ -144,7 +155,6 @@ class SalesInvoice extends BaseController
         $archives = $data['archive_items'];
 
         $params = [
-            $customerId,
             $customerTerms,
             $vatableSales,
             $vatExemptSales,
@@ -155,6 +165,7 @@ class SalesInvoice extends BaseController
             $totalAmount,
             $si_status,
             $user_id,
+            $customerDate,
             $data['si_id'] // Add the sales invoice ID for updating
         ];
 
@@ -230,18 +241,26 @@ class SalesInvoice extends BaseController
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
         }
+
+        if (!empty($result) && $result[0]->si_status === 'printed') {
+            return $this->response->setStatusCode(400)->setJSON(['error' => 'Cannot edit a printed invoice.']);
+        }
         
 
         $salesInvoice = [];
         $items = [];
-        $discounts = [];
 
         foreach ($result as $row) {
             if (empty($salesInvoice)) {
                 $salesInvoice = [
                     'id' => $row->id,
                     'client_id' => $row->client_id,
+                    'client_name' => $row->client_name,
+                    'client_tin' => $row->client_tin,
                     'client_term_name' => $row->client_term,
+                    'client_address' => $row->client_address,
+                    'client_business_name' => $row->client_business_name,
+                    'si_date' => $row->si_date,
                     'si_status' => $row->si_status,
                     'freight_cost' => $row->freight_cost,
                     'items' => []
@@ -275,5 +294,25 @@ class SalesInvoice extends BaseController
         $salesInvoice['items'] = array_values($items);
 
         return json_encode($salesInvoice);
+    }
+
+    function print_si() {
+        $session = session();
+        $user_id = $session->get('user_id');
+
+        $id = $this->request->getJSON(true);
+
+        $params = [
+            $user_id,
+            $id
+        ];
+
+        $result = $this->coreModel->print_sales_invoice($params);
+
+        if ($result === 'success') {
+            return json_encode(['status' => 'success']);
+        } else {
+            return json_encode(['status' => 'failed']);
+        }
     }
 }

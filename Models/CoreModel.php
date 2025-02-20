@@ -120,7 +120,11 @@ class CoreModel extends Model
 
             $query = "INSERT INTO sales_invoice (
                 client_id,
+                client_name,
+                client_tin,
                 client_term,
+                client_address,
+                client_business_name,
                 vatable_sales,
                 vat_exempt_sales,
                 zero_rated,
@@ -131,10 +135,11 @@ class CoreModel extends Model
                 si_status,
                 creator_id,
                 updater_id,
-                archive
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+                archive,
+                si_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)";
 
-            $result = $this->db->query($query, $data);
+            $this->db->query($query, $data);
 
             $this->db->transComplete(); // Complete Transaction
 
@@ -145,7 +150,7 @@ class CoreModel extends Model
             } else {
                 // Transaction successful, commit
                 $this->db->transCommit();
-                $creator_id = $data[11]; // Assuming creator_id is the 11th element in the $data array
+                $creator_id = $data[14]; // Assuming creator_id is the 11th element in the $data array
                 $lastInsertQuery = $this->db->query("SELECT id FROM sales_invoice WHERE creator_id = ? ORDER BY created_at DESC LIMIT 1", [$creator_id])->getResult();
                 return $lastInsertQuery; // Return the last inserted ID and result
             }
@@ -162,7 +167,6 @@ class CoreModel extends Model
             $this->db->transStart(); // Start Transaction
 
             $query = "UPDATE sales_invoice SET 
-                client_id = ?,
                 client_term = ?,
                 vatable_sales = ?,
                 vat_exempt_sales = ?,
@@ -173,6 +177,7 @@ class CoreModel extends Model
                 total_amount = ?,
                 si_status = ?,
                 updater_id = ?,
+                si_date = ?,
                 updated_at = CURRENT_TIMESTAMP
                 WHERE id = ? AND archive = 0";
 
@@ -374,15 +379,15 @@ class CoreModel extends Model
             $productsQuery = "SELECT * FROM products WHERE archive = 0";
             $clientsQuery = "SELECT * FROM clients WHERE archive = 0";
             $sales_invoice_query = "SELECT 
-                    si.id,
-                    c.client_name,
-                    si.client_term,
-                    si.si_status,
-                    si.updated_at
+                    id,
+                    client_name,
+                    client_term,
+                    si_status,
+                    si_date
                 FROM
-                    sales_invoice si
-                        INNER JOIN
-                    clients c ON si.client_id = c.id";
+                    sales_invoice
+                ORDER BY id DESC
+                LIMIT 500";
 
             $products = $this->db->query($productsQuery)->getResult();
             $clients = $this->db->query($clientsQuery)->getResult();
@@ -491,7 +496,11 @@ class CoreModel extends Model
             $query = "SELECT 
                         si.id AS id,
                         si.client_id AS client_id,
+                        si.client_name AS client_name,
+                        si.client_tin AS client_tin,
                         si.client_term AS client_term,
+                        si.client_address AS client_address,
+                        si.client_business_name AS client_business_name,
                         si.si_status AS si_status,
                         si.freight_cost AS freight_cost,
                         p.id AS product_id,
@@ -504,7 +513,8 @@ class CoreModel extends Model
                         si_items.si_item_vatable_sales, 
                         si_items.si_unique_id,
                         si_items_discount.discount_label, 
-                        si_items_discount.discount
+                        si_items_discount.discount,
+                        si.si_date
                     FROM sales_invoice si
                     LEFT JOIN sales_invoice_items_list si_items ON si.id = si_items.si_id
                     LEFT JOIN sales_invoice_items_list_discount si_items_discount ON si_items.id = si_items_discount.si_item_id
@@ -610,6 +620,37 @@ class CoreModel extends Model
             return $this->db->query($query, [$id])->getResult();
         } catch (\Exception $e) {
             return $e->getMessage();
+        }
+    }
+
+    public function print_sales_invoice($params)
+    {
+        try {
+            $this->db->transStart(); // Start Transaction
+
+            $query = "UPDATE sales_invoice SET 
+                si_status = 'printed',
+                updater_id = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND archive = 0";
+
+            $this->db->query($query, $params);
+
+            $this->db->transComplete(); // Complete Transaction
+
+            if ($this->db->transStatus() === false) {
+                // Transaction failed, rollback
+                $this->db->transRollback();
+                return 'failed';
+            } else {
+                // Transaction successful, commit
+                $this->db->transCommit();
+                return 'success';
+            }
+        } catch (\Exception $e) {
+            // Rollback transaction in case of exception
+            $this->db->transRollback();
+            return ['status' => 'error', 'message' => $e->getMessage()];
         }
     }
     
