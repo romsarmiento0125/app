@@ -61,7 +61,7 @@
             <div class="sales_invoice_box">
                 <div class="sales_invoice_title">
                     <p id="si_id">Sales Invoice</p>
-                </div>clients_details
+                </div>
                 <hr>
                 <div class="">
                     <div class="row">
@@ -1165,9 +1165,13 @@
             data: JSON.stringify(id),
             success: function(response) {
                 var data = JSON.parse(response);
-                console.log(data);
-                window.open("/sales_invoice_view/"+id, "_blank");
-                get_products_clients_si();
+                if(data.status === 'success') {
+                    window.open("/sales_invoice_view/"+id, "_blank");
+                    get_products_clients_si();
+                }
+                else {
+                    alert('Failed to print sales invoice');
+                }
             },
             error: function(xhr) {
                 if (xhr.status === 400) {
