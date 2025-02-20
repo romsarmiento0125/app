@@ -581,6 +581,8 @@
     }
 
     function clear_item_fields() {
+        selected_product_id = 0;
+        selected_item_code = "";
         $('#products_details').empty();
         populateSelect('#products_details', products, 'product_name_item');
         $('#item_price_details').val('');
