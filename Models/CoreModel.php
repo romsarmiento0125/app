@@ -419,6 +419,16 @@ class CoreModel extends Model
         }
     }
 
+    public function edit_check_product_exists($product_name, $product_item)
+    {
+        try {
+            $query = "SELECT id FROM products WHERE (product_name = ? OR product_item = ?) AND archive = 0";
+            return $this->db->query($query, [$product_name, $product_item])->getResult();
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
     public function insert_product($params)
     {
         try {

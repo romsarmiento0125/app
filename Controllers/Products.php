@@ -81,12 +81,14 @@ class Products extends BaseController
         $product_price = $data['product_price'];
 
         // Check if product name or item already exists
-        $result = $this->coreModel->check_product_exists($product_name, $product_item);
-        if (is_string($result)) {
-            return json_encode(['status' => 'error', 'message' => $result]);
-        }
-        if ($result[0]->count > 0) {
-            return json_encode(['status' => 'exists', 'message' => 'Product already exists']);
+        $result = $this->coreModel->edit_check_product_exists($product_name, $product_item);
+        if(!empty($result)) {
+            if(count($result) > 1) {
+                return json_encode(['status' => 'error', 'message' => 'Product or Item code already exists']);
+            }
+            if($result[0]->id !== $product_name_attr) {
+                return json_encode(['status' => 'error', 'message' => 'Product or Item code already exists']);
+            }
         }
 
         $params = [

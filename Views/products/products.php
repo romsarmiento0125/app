@@ -276,7 +276,6 @@
             product_weight: $('#product_weight').val(),
             product_price: parseFloat($('#product_price').val()).toFixed(2)
         }
-        console.log(product_data);
 
         if (product_data.product_name === '' || product_data.product_item === '' || product_data.product_unit === '' || product_data.product_weight === '' || product_data.product_price === '') {
             alert('All fields are required');
