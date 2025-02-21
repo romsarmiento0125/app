@@ -295,7 +295,7 @@
     $(document).ready(function() {
         get_products_clients_dr();
         add_discount_input();
-        // initialize_inputs();
+        initialize_inputs();
         $('#item_remove_discount').hide();
         $('#client_date_details').val(new Date().toISOString().split('T')[0]);
     });

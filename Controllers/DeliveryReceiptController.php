@@ -221,10 +221,10 @@ class DeliveryReceiptController extends BaseController
         }
     }
 
-    function get_sales_invoice_by_id() {
+    function get_delivery_receipt_by_id() {
         $id = $this->request->getJSON(true);
 
-        $result = $this->deliveryReceiptModel->get_sales_invoice_by_id($id);
+        $result = $this->deliveryReceiptModel->get_delivery_receipt_by_id($id);
 
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
