@@ -3,6 +3,11 @@
 <?= $this->section('content') ?>
 
 <style>
+    .receipt_container {
+        background-color: lightgrey;
+        height: 1000px;
+    }
+
     .receipt_margin {
         margin-top: 155px;
     }
@@ -37,11 +42,10 @@
         font-size: 16px;
         margin-left: 160px;
     }
-    
 </style>
 
 <div class="row">
-    <div class="col-10">
+    <div class="col-10 receipt_container d-flex flex-column justify-content-between">
         <div class="receipt_margin">
             <div class="row">
                 <div class="col-8">
@@ -63,28 +67,16 @@
                     <p id="sir_business_name"></p>
                 </div>
                 <div class="col-4">
-        
+
                 </div>
             </div>
             <div class="" id="item_lists">
-                <!-- <div class="row">
-                    <div class="col-1">
-                        <p>30</p>
-                    </div>
-                    <div class="col-2">
-                        <p>BAGS</p>
-                    </div>
-                    <div class="col-5">
-                        <p>1 BLEND HOG BREEDER MASH</p>
-                    </div>
-                    <div class="col-2">
-                        <p>1,180.00</p>
-                    </div>
-                    <div class="col-2">
-                        <p>35,400.00</p>
-                    </div>
-                </div> -->
+                
             </div>
+        </div>
+
+
+        <div class="">
             <div class="">
                 <div class="row">
                     <div class="col-1">
@@ -118,34 +110,20 @@
                 </div>
             </div>
             <div class="" id="item_discounts">
-                <!-- <div class="row">
-                    <div class="col-1">
-                    </div>
-                    <div class="col-2">
-                    </div>
-                    <div class="col-5 d-flex justify-content-end">
-                        <p>40 x 150</p>
-                    </div>
-                    <div class="col-2">
-                    </div>
-                    <div class="col-2">
-                        <p>6,000.00 hbm</p>
-                    </div>
-                </div> -->
             </div>
             <div class="">
                 <div class="row">
                     <div class="col-1">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-5">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-2">
                         <p id="vat_sales"></p>
@@ -155,16 +133,16 @@
             <div class="">
                 <div class="row">
                     <div class="col-1">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-5">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-2">
                         <p id="vat_exempt"></p>
@@ -174,16 +152,16 @@
             <div class="">
                 <div class="row">
                     <div class="col-1">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-5">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-2">
                         <p>0</p>
@@ -193,16 +171,16 @@
             <div class="">
                 <div class="row">
                     <div class="col-1">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-5">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-2">
                         <p id="vat_amount"></p>
@@ -212,16 +190,16 @@
             <div class="">
                 <div class="row">
                     <div class="col-1">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-5">
-        
+    
                     </div>
                     <div class="col-2">
-        
+    
                     </div>
                     <div class="col-2">
                         <p id="total_amount_due"></p>
@@ -254,9 +232,9 @@
     });
 
     function item_lists(data) {
-        data.forEach(function (item) {
+        data.forEach(function(item) {
             total_amount += parseFloat(item.amount);
-            var item_row = '<div class="row"><div class="col-1"><p>' + item.si_item_qty + '</p></div>' + 
+            var item_row = '<div class="row"><div class="col-1"><p>' + item.si_item_qty + '</p></div>' +
                 '<div class="col-2"><p>BAGS</p></div>' +
                 '<div class="col-5"><p>' + item.product_name + ' </p></div>' +
                 '<div class="col-2"><p>' + formatPrice(item.unit_price) + '</p></div>' +
@@ -268,11 +246,11 @@
     }
 
     function item_discounts(discounts, qty) {
-        discounts.forEach(function (discount) {
+        discounts.forEach(function(discount) {
             var discount_row = '<div class="row"><div class="col-1"></div><div class="col-2"></div>' +
                 '<div class="col-5 d-flex justify-content-end"><p>' + discount.discount + ' x ' + qty + '</p></div>' +
                 '<div class="col-2"></div>' +
-                '<div class="col-2"><p>' + formatPrice(discount.discount*qty) + '&nbsp;' + discount.label + '</p></div></div>';
+                '<div class="col-2"><p>' + formatPrice(discount.discount * qty) + '&nbsp;' + discount.label + '</p></div></div>';
             $("#item_discounts").append(discount_row);
         });
     }
@@ -308,7 +286,10 @@
     }
 
     function formatPrice(price) {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'PHP' }).format(price);
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'PHP'
+        }).format(price);
     }
 
     function formatDateYearMonthDayDashed(dateString) {

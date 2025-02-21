@@ -2,14 +2,17 @@
 
 namespace App\Controllers;
 
-use App\Models\CoreModel;
+// use App\Models\CoreModel;
+use App\Models\SalesInoviceModel;
 
 class SalesInvoice extends BaseController
 {
-    protected $coreModel;
+    // protected $coreModel;
+    protected $salesInvoiceModel;
     public function __construct()
     {
-        $this->coreModel = new CoreModel();
+        // $this->coreModel = new CoreModel();
+        $this->salesInvoiceModel = new SalesInoviceModel();
     }
 
     public function index()
@@ -23,7 +26,7 @@ class SalesInvoice extends BaseController
     }
 
     public function get_products_clients_si() {
-        $result = $this->coreModel->get_products_clients_si();
+        $result = $this->salesInvoiceModel->get_products_clients_si();
         
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
@@ -87,7 +90,7 @@ class SalesInvoice extends BaseController
             $customerdate
         ];
 
-        $insertResult = $this->coreModel->insert_sales_invoice($params);
+        $insertResult = $this->salesInvoiceModel->insert_sales_invoice($params);
 
         // return json_encode(['invoice' => $insertResult]);
         if (is_array($insertResult) && !empty($insertResult)) {
@@ -107,15 +110,15 @@ class SalesInvoice extends BaseController
                     $user_id
                     
                 ];
-                $lastItemResult = $this->coreModel->insert_sales_invoice_items($params);
+                $lastItemResult = $this->salesInvoiceModel->insert_sales_invoice_items($params);
 
                 if (isset($item['item_discount'])) {
                     $si_item_id = $lastItemResult[0]->id; // Get the last inserted ID for the item
-                    $this->coreModel->insert_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
+                    $save_complete = $this->salesInvoiceModel->insert_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
                 }
             }
 
-            return json_encode(['invoice_id' => $insertId, 'items' => $params, 'lastItem' => $lastItemResult]);
+            return json_encode(['invoice_id' => $insertId, 'invoice' => $save_complete]);
         } else {
             return json_encode(['invoice' => $insertResult]);
         }
@@ -171,7 +174,7 @@ class SalesInvoice extends BaseController
 
         
 
-        $updateResult = $this->coreModel->update_sales_invoice($params);
+        $updateResult = $this->salesInvoiceModel->update_sales_invoice($params);
         
         if ($updateResult === 'success') {
             foreach ($items as $item) { 
@@ -188,11 +191,11 @@ class SalesInvoice extends BaseController
                         $user_id,
                         $user_id
                     ];
-                    $lastItemResult = $this->coreModel->insert_sales_invoice_items($params);
+                    $lastItemResult = $this->salesInvoiceModel->insert_sales_invoice_items($params);
     
                     if (isset($item['item_discount'])) {
                         $si_item_id = $lastItemResult[0]->id; // Get the last inserted ID for the item
-                        $this->coreModel->insert_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
+                        $this->salesInvoiceModel->insert_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
                     }
                 }
                 else {
@@ -206,11 +209,11 @@ class SalesInvoice extends BaseController
                         $user_id,
                         $item['id']
                     ];
-                    $result = $this->coreModel->update_sales_invoice_items($params);
+                    $result = $this->salesInvoiceModel->update_sales_invoice_items($params);
 
                     if (isset($item['item_discount'])) {
                         $si_item_id = $item['id'];
-                        $this->coreModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
+                        $this->salesInvoiceModel->update_sales_invoice_items_discounts($item['item_discount'], $si_item_id, $user_id);
                     }
                 }
 
@@ -223,7 +226,7 @@ class SalesInvoice extends BaseController
                         1,
                         $archive['id'],
                     ];
-                    $this->coreModel->archive_sales_invoice_items($params);
+                    $this->salesInvoiceModel->archive_sales_invoice_items($params);
                 }
                
             }
@@ -236,7 +239,7 @@ class SalesInvoice extends BaseController
     function get_sales_invoice_by_id() {
         $id = $this->request->getJSON(true);
 
-        $result = $this->coreModel->get_sales_invoice_by_id($id);
+        $result = $this->salesInvoiceModel->get_sales_invoice_by_id($id);
 
         if (is_string($result)) {
             return $this->response->setStatusCode(500)->setJSON(['error' => $result]);
@@ -307,7 +310,7 @@ class SalesInvoice extends BaseController
             $id
         ];
 
-        $result = $this->coreModel->print_sales_invoice($params);
+        $result = $this->salesInvoiceModel->print_sales_invoice($params);
 
         if ($result === 'success') {
             return json_encode(['status' => 'success']);

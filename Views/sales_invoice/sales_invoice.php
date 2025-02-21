@@ -867,6 +867,15 @@
             if (!customerDetail.terms) missingFields.push('Customer Terms');
             if (item_table_data.length === 0) missingFields.push('Items');
 
+            // New validation for discount labels
+            item_table_data.forEach(function(item) {
+                item.item_discount.forEach(function(discount) {
+                    if (discount.discount && !discount.label) {
+                        missingFields.push('Discount Label for discount value ' + discount.discount);
+                    }
+                });
+            });
+
             if (missingFields.length > 0) {
                 alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));
                 return;
@@ -879,11 +888,16 @@
                 data: JSON.stringify(invoiceData),
                 success: function(response) {
                     var data = JSON.parse(response);
-                    if(type === "draft") {
-                        alert('Draft saved successfully');
+                    if(data.invoice === "success") {
+                        if(type === "draft") {
+                            alert('Draft saved successfully');
+                        }
+                        else {
+                            print_si(data.invoice_id)
+                        }
                     }
                     else {
-                        print_si(data.invoice_id)
+                        alert('Failed to save draft');
                     }
                     clearTableAndSummary();
                     get_products_clients_si();
@@ -1112,6 +1126,15 @@
         if (!summaryData.vatExemptSales) missingFields.push('VAT Exempt Sales');
         if (!customerDetail.terms) missingFields.push('Customer Terms');
         if (item_table_data.length === 0) missingFields.push('Items');
+
+        // New validation for discount labels
+        item_table_data.forEach(function(item) {
+            item.item_discount.forEach(function(discount) {
+                if (discount.discount && !discount.label) {
+                    missingFields.push('Discount Label for discount value ' + discount.discount);
+                }
+            });
+        });
 
         if (missingFields.length > 0) {
             alert('Invalid data. Please fill in the following fields: ' + missingFields.join(', '));

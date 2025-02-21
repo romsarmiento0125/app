@@ -22,6 +22,11 @@ $routes->post('/sales_invoice/update_draft', 'SalesInvoice::update_draft');
 $routes->post('/sales_invoice/print_si', 'SalesInvoice::print_si');
 
 $routes->get('/delivery_receipt', 'DeliveryReceiptController::index');
+$routes->post('/delivery_receipt/get_products_clients_dr', 'DeliveryReceiptController::get_products_clients_dr');
+$routes->post('/delivery_receipt/save_draft', 'DeliveryReceiptController::save_draft');
+$routes->post('/delivery_receipt/get_delivery_receipt_by_id', 'DeliveryReceiptController::get_delivery_receipt_by_id');
+$routes->post('/delivery_receipt/update_draft', 'DeliveryReceiptController::update_draft');
+$routes->post('/delivery_receipt/print_dr', 'DeliveryReceiptController::print_dr');
 
 $routes->get('/products', 'Products::index');
 $routes->post('/products/save_product', 'Products::save_product');
